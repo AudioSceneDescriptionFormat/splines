@@ -1,0 +1,4 @@
+NumPy
+SymPy
+SciPy
+matplotlib
