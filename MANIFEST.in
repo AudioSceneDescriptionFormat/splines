@@ -1,0 +1,5 @@
+include LICENSE
+include *.rst
+include doc/requirements.txt
+include doc/conf.py
+recursive-include doc *.rst *.py *.ipynb
