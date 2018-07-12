@@ -4,4 +4,4 @@ ipykernel
 NumPy
 SymPy
 SciPy
-matplotlib
+matplotlib>=2.1
