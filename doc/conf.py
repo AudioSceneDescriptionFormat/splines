@@ -1,3 +1,5 @@
+import sphinx_bootstrap_theme
+
 project = 'Piecewise Polynomial Curves'
 author = 'Matthias Geier'
 copyright = '2018, ' + author
@@ -34,8 +36,17 @@ except Exception:
 # -- Options for HTML output -------------------------------------------------
 
 html_title = project + ', version ' + release
-html_theme = 'alabaster'
-html_theme_options = {}
+html_theme = 'bootstrap'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_options = {
+    'navbar_title': 'splines',
+    'navbar_site_name': 'Pages',
+    'navbar_pagenav_name': 'This Page',
+    'navbar_fixed_top': True,
+    'source_link_position': 'footer',
+    #'bootswatch_theme': 'cosmo',
+    'bootswatch_theme': 'yeti',
+}
 html_domain_indices = False
 html_show_sourcelink = True
 
