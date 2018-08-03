@@ -440,6 +440,13 @@ class ShapePreservingCubic1D(FiniteDifference):
 
         CubicHermite.__init__(self, values, final_slopes, grid)
 
+
+class MonotoneCubic1D(ShapePreservingCubic1D):
+
+    def __init__(self, values, *args, **kwargs):
+        # TODO: check if values are monotone
+        ShapePreservingCubic1D.__init__(self, values, *args, **kwargs)
+
     # TODO: rename to something with "solve"?
     def get_time(self, value):
         """Get the time instance for the given value.
