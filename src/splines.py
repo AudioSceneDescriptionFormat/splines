@@ -47,14 +47,7 @@ class PiecewiseCurve:
         if not _np.isscalar(t):
             return _np.array([self(time, n) for time in t])
 
-        if t < self.grid[0]:
-            raise ValueError(f't too small: {t}')
-        elif t < self.grid[-1]:
-            idx = _bisect_right(self.grid, t) - 1
-        elif t == self.grid[-1]:
-            idx = len(self.segments) - 1
-        else:
-            raise ValueError(f't too big: {t}')
+        idx = _check_t(t, self.grid)
 
         t0, t1 = self.grid[idx:idx + 2]
         t = (t - t0) / (t1 - t0)
@@ -63,6 +56,18 @@ class PiecewiseCurve:
         product = _np.multiply.reduce
         weights = product([powers + 1 + i for i in range(n)]) / (t1 - t0)**n
         return t**powers * weights @ coefficients
+
+
+def _check_t(t, grid):
+    if t < grid[0]:
+        raise ValueError(f't too small: {t}')
+    elif t < grid[-1]:
+        idx = _bisect_right(grid, t) - 1
+    elif t == grid[-1]:
+        idx = len(grid) - 2
+    else:
+        raise ValueError(f't too big: {t}')
+    return idx
 
 
 def _check_vertices(vertices, *, closed):
