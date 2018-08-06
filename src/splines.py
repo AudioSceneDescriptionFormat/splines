@@ -67,8 +67,8 @@ class PiecewiseCurve:
 
 def _check_vertices(vertices, *, closed):
     """For closed curves, append first vertex at the end."""
-    if len(vertices) < 3:
-        raise ValueError('At least three vertices are required')
+    if len(vertices) < 2:
+        raise ValueError('At least two vertices are required')
     if closed:
         vertices = _np.concatenate([vertices, vertices[:1]])
     return vertices
@@ -109,6 +109,24 @@ def _check_endconditions(endconditions, vertices, grid):
             raise TypeError('endconditions must be a string or a pair')
     triples = [zip(arg, arg[1:], arg[2:]) for arg in (vertices, grid)]
     return (start, end, *triples)
+
+
+def _check_tangents(tangents, vertices, grid, start, end, *, closed):
+    if closed:
+        # Move last (outgoing) tangent to the beginning:
+        tangents = tangents[-1:] + tangents[:-1]
+    elif not tangents:
+        # straight line
+        assert len(vertices) == 2
+        assert len(grid) == 2
+        vertices = _np.asarray(vertices)
+        tangents = [(vertices[1] - vertices[0]) / (grid[1] - grid[0])] * 2
+    else:
+        tangents.insert(0, _end_tangent(
+            start, vertices[:2], grid[:2], tangents[0]))
+        tangents.append(_end_tangent(
+            end, vertices[-2:], grid[-2:], tangents[-1]))
+    return tangents
 
 
 def _end_tangent(condition, vertices, times, other_tangent):
@@ -213,14 +231,8 @@ class CatmullRom(CubicHermite):
             for points, times in zip(zip_vertices, zip_grid)]
         # Duplicate tangents (incoming and outgoing are the same):
         tangents = [x for tangent in tangents for x in (tangent, tangent)]
-        if closed:
-            # Move last (outgoing) tangent to the beginning:
-            tangents = tangents[-1:] + tangents[:-1]
-        else:
-            tangents.insert(0, _end_tangent(
-                start, vertices[:2], grid[:2], tangents[0]))
-            tangents.append(_end_tangent(
-                end, vertices[-2:], grid[-2:], tangents[-1]))
+        tangents = self._check_tangents(
+            tangents, vertices, grid, start, end, closed=closed)
         CubicHermite.__init__(self, vertices, tangents, grid)
 
 
@@ -285,14 +297,8 @@ class KochanekBartels(CubicHermite):
             tangent
             for points, times, tcb in zip(zip_vertices, zip_grid, tcb)
             for tangent in self._calculate_tangents(points, times, tcb)]
-        if closed:
-            # Move last (outgoing) tangent to the beginning:
-            tangents = tangents[-1:] + tangents[:-1]
-        else:
-            tangents.insert(0, _end_tangent(
-                start, vertices[:2], grid[:2], tangents[0]))
-            tangents.append(_end_tangent(
-                end, vertices[-2:], grid[-2:], tangents[-1]))
+        tangents = _check_tangents(
+            tangents, vertices, grid, start, end, closed=closed)
         CubicHermite.__init__(self, vertices, tangents, grid)
 
 
