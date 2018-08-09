@@ -319,18 +319,13 @@ def _monotone_end_condition(inner_slope, chord_slope):
     # within the first/last curve segment.  Especially, this should avoid a
     # change from negative to positive acceleration (and vice versa).
     # There might be a better method available!?!
-    if chord_slope >= 0:
-        assert 0 <= inner_slope <= 3 * chord_slope
-        if inner_slope <= chord_slope:
-            return 3 * chord_slope - 2 * inner_slope
-        else:
-            return (3 * chord_slope - inner_slope) / 2
+    if chord_slope < 0:
+        return -_monotone_end_condition(-inner_slope, -chord_slope)
+    assert 0 <= inner_slope <= 3 * chord_slope
+    if inner_slope <= chord_slope:
+        return 3 * chord_slope - 2 * inner_slope
     else:
-        assert 3 * chord_slope <= inner_slope <= 0
-        if chord_slope <= inner_slope:
-            return 3 * chord_slope - 2 * inner_slope
-        else:
-            return (3 * chord_slope - inner_slope) / 2
+        return (3 * chord_slope - inner_slope) / 2
 
 
 class ShapePreservingCubic1D(FiniteDifference):
