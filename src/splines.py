@@ -1,7 +1,7 @@
 """Piecewise Polynomial Curves.
 
 """
-from bisect import bisect_right as _bisect_right
+from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
 import numpy as _np
 
 __version__ = '0.0'
@@ -462,16 +462,28 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
 
         """
         values = self(self.grid)
-        if not values[0] <= value <= values[-1]:
+        if values[0] <= value <= values[-1]:
+            # Increasing values
+
+            def get_index(values, value):
+                return _bisect_right(values, value) - 1
+
+        elif values[-1] <= value <= values[0]:
+            # Decreasing values
+
+            def get_index(values, value):
+                return len(values) - _bisect_left(values[::-1], value) - 1
+
+        else:
             raise ValueError(f'value outside allowed range: {value}')
-        # First, check for exact matches to avoid accuracy issues
+        # First, check for exact matches to find plateaus
         matches, = _np.nonzero(values == value)
         if len(matches) > 1:
             return None  # non-monotonic or plateau
         if len(matches) == 1:
             return self.grid[matches[0]]
 
-        idx = _bisect_right(values, value) - 1
+        idx = get_index(values, value)
         coeffs = self.segments[idx]
         # Solve for p - value = 0
         roots = (_np.poly1d(coeffs) - value).roots
