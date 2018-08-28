@@ -42,10 +42,10 @@ class PiecewiseCurve:
                          for coefficients in segments]
         self.grid = list(grid)
 
-    def __call__(self, t, n=0):
+    def evaluate(self, t, n=0):
         """Get value (or n-th derivative) at given time(s)."""
         if not _np.isscalar(t):
-            return _np.array([self(time, n) for time in t])
+            return _np.array([self.evaluate(time, n) for time in t])
 
         idx = _check_t(t, self.grid)
 
