@@ -236,7 +236,7 @@ class CatmullRom(CubicHermite):
             for points, times in zip(zip_vertices, zip_grid)]
         # Duplicate tangents (incoming and outgoing are the same):
         tangents = [x for tangent in tangents for x in (tangent, tangent)]
-        tangents = self._check_tangents(
+        tangents = _check_tangents(
             tangents, vertices, grid, start, end, closed=closed)
         CubicHermite.__init__(self, vertices, tangents, grid)
 
