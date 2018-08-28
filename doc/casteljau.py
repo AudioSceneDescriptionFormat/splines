@@ -53,9 +53,9 @@ def create_animation(points, frames, ax=None, **kwargs):
     def animation_func(t):
         ax.clear()
         if partial_curve:
-            ax.scatter(*np.asarray(partial_curve).T, c='lightgrey')
+            ax.plot(*np.asarray(partial_curve).T, '.', c='lightgrey')
         point = plot_casteljau(points, t, ax=ax)
-        ax.scatter(*np.asarray(points).T, c='black')
+        ax.scatter(*np.asarray(points).T, marker='x', c='black')
         partial_curve.append(point)
 
     times = np.linspace(0, 1, frames)
