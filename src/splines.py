@@ -87,7 +87,11 @@ def _check_grid(grid, alpha, vertices):
         vertices = _np.asarray(vertices)
         grid = [0]
         for x0, x1 in zip(vertices, vertices[1:]):
-            grid.append(grid[-1] + _np.linalg.norm(x1 - x0)**alpha)
+            delta = _np.linalg.norm(x1 - x0)**alpha
+            if delta == 0:
+                raise ValueError(
+                    'Repeated vertices are not possible with alpha != 0')
+            grid.append(grid[-1] + delta)
     else:
         if alpha is not None:
             raise TypeError('Only one of {grid, alpha} is allowed')
