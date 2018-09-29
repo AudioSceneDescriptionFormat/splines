@@ -18,7 +18,7 @@ class PiecewiseCurve:
 
         \boldsymbol{p}_i(t) = \sum_{k=0}^n
             \boldsymbol{a}_k \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
-            \text{ for } t_i \leq t \lt t_{i+1}
+            \text{ for } t_i \leq t < t_{i+1}
 
     Similar to https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PPoly.html,
     which states:
