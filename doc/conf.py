@@ -104,6 +104,7 @@ latex_elements = {
 }
 
 latex_show_urls = 'footnote'
+latex_domain_indices = False
 
 latex_documents = [
     (master_doc, 'PiecewisePolynomialCurves.tex', project, author, 'howto'),
