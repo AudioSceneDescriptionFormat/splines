@@ -21,6 +21,8 @@ master_doc = 'index'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 pygments_style = 'sphinx'
 
+nbsphinx_execute_arguments = ['--InlineBackend.figure_formats={"png", "pdf"}']
+
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base='doc') %}
 
