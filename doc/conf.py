@@ -23,9 +23,20 @@ pygments_style = 'sphinx'
 
 nbsphinx_execute_arguments = ['--InlineBackend.figure_formats={"png", "pdf"}']
 
-nbsphinx_prolog = r"""
-{% set docname = env.doc2path(env.docname, base='doc') %}
+if_docname = """
+{% set docname = env.doc2path(env.docname, base=None) %}
+{% if docname not in [
+    'index.ipynb',
+    'catmull-rom.ipynb',
+] %}
+{% set docname = 'doc/' + docname %}
+"""
 
+endif = """
+{% endif %}
+"""
+
+nbsphinx_prolog = if_docname + r"""
 .. only:: html
 
     .. role:: raw-html(raw)
@@ -45,20 +56,20 @@ nbsphinx_prolog = r"""
     \vfil\penalty-1\vfilneg
     \vspace{\baselineskip}
     \textcolor{gray}{The following section was generated from
-    \texttt{\strut{}{{ docname }}}\\[-0.5\baselineskip]
+    \texttt{\strut {{ docname }}}\\[-0.5\baselineskip]
     \noindent\rule{\textwidth}{0.4pt}}
     \vspace{-2\baselineskip}
-"""
+""" + endif
 
-# This is processed by Jinja2 and inserted after each notebook
-nbsphinx_epilog = r"""
+nbsphinx_epilog = if_docname + r"""
 .. raw:: latex
 
     \textcolor{gray}{\noindent\rule{\textwidth}{0.4pt}\\
     \hbox{}\hfill End of
-    \texttt{\strut{}{{ env.doc2path(env.docname, base='doc') }}}}
+    \texttt{\strut{}{{ docname }}}}
     \vfil\penalty-1\vfilneg
-"""
+""" + endif
+
 # -- Get version information and date from Git ----------------------------
 
 try:
