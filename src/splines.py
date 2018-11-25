@@ -57,6 +57,20 @@ class PiecewiseCurve:
         weights = product([powers + 1 + i for i in range(n)]) / (t1 - t0)**n
         return t**powers * weights @ coefficients
 
+    def tangent(self, t):
+        """Calculate the (normalized) tangent at given time(s)."""
+        a = self.evaluate(t, 1)
+        return a / _np.linalg.norm(a, axis=-1)[:, _np.newaxis]
+
+    def binormal(self, t):
+        """Calculate the binormal at given time(s)."""
+        a = np.cross(self.evaluate(t, 1), self.evaluate(t, 2))
+        return a / _np.linalg.norm(a, axis=-1)
+
+    def normal(self, t):
+        """Calculate the principal normal at given time(s)."""
+        return _np.cross(self.binormal(t), self.tangent(t))
+
 
 def _check_t(t, grid):
     if t < grid[0]:
