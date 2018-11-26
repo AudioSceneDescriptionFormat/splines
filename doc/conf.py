@@ -1,3 +1,6 @@
+from ipywidgets.embed import DEFAULT_EMBED_REQUIREJS_URL
+import sphinx_bootstrap_theme
+
 project = 'Piecewise Polynomial Curves'
 author = 'Matthias Geier'
 copyright = '2018, ' + author
@@ -13,6 +16,10 @@ extensions = [
 
 highlight_language = 'none'
 html_sourcelink_suffix = ''
+html_js_files = [
+    'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js',
+    DEFAULT_EMBED_REQUIREJS_URL,
+]
 
 intersphinx_mapping = {'https://docs.python.org/': None}
 
