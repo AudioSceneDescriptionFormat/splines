@@ -2,4 +2,5 @@ NumPy
 SymPy
 SciPy
 matplotlib
+ipywidgets>=7.4
 ipyvolume
