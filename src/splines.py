@@ -1,5 +1,7 @@
 """Piecewise Polynomial Curves.
 
+.. include:: math-definitions.rst
+
 """
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
 import numpy as _np
@@ -58,18 +60,85 @@ class PiecewiseCurve:
         return t**powers * weights @ coefficients
 
     def tangent(self, t):
-        """Calculate the (normalized) tangent at given time(s)."""
+        r"""Calculate the (normalized) tangent at given time(s).
+
+        This only works for 2D and 3D curves.
+
+        .. math::
+
+            \vec{T} = \frac{\vec{\dot{x}}}{\norm{\vec{\dot{x}}}}
+
+        """
         a = self.evaluate(t, 1)
-        return a / _np.linalg.norm(a, axis=-1)[:, _np.newaxis]
+        if _np.isscalar(t):
+            return _normalize(a)
+        return _np.apply_along_axis(_normalize, 1, a)
 
     def binormal(self, t):
-        """Calculate the binormal at given time(s)."""
-        a = np.cross(self.evaluate(t, 1), self.evaluate(t, 2))
-        return a / _np.linalg.norm(a, axis=-1)
+        r"""Calculate the binormal at given time(s).
+
+        This only works for 3D curves.
+
+        .. math::
+
+            \vec{B} = \frac
+            {\vec{\dot{x}} \times \vec{\ddot{x}}}
+            {\norm{\vec{\dot{x}} \times \vec{\ddot{x}}}}
+
+        """
+        a = _np.cross(self.evaluate(t, 1), self.evaluate(t, 2))
+        if _np.isscalar(t):
+            return _normalize(a)
+        return _np.apply_along_axis(_normalize, 1, a)
 
     def normal(self, t):
-        """Calculate the principal normal at given time(s)."""
+        r"""Calculate the principal normal at given time(s).
+
+        This only works for 2D and 3D curves.
+
+        2D case: TODO
+
+        3D case:
+
+        .. math::
+
+            \vec{N} = \vec{B} \times \vec{T}
+
+        """
+        ndim = self.segments[0].shape[1]
+        if ndim == 2:
+            raise NotImplementedError('TODO: implement 2D case!')
         return _np.cross(self.binormal(t), self.tangent(t))
+
+    def curvature(self, t):
+        r"""Calculate the curvature at given time(s).
+
+        This only works for 2D and 3D curves.
+
+        3D case:
+
+        .. math::
+
+            \kappa = \frac
+            {\norm{\vec{\dot{x}} \times \vec{\ddot{x}}}}
+            {\norm{\vec{\dot{x}}} ^ 3}
+
+        """
+        return NotImplemented
+
+    def torsion(self, t):
+        r"""Calculate the torsion at given time(s).
+
+        This only works for 3D curves.
+
+        .. math::
+
+            \tau = \frac
+            {(\vec{\dot{x}} \times \vec{\ddot{x}}) \cdot \vec{\dddot{x}}}
+            {\norm{\vec{\dot{x}} \times \vec{\ddot{x}}} ^ 2}
+
+        """
+        return NotImplemented
 
 
 def _check_t(t, grid):
@@ -82,6 +151,12 @@ def _check_t(t, grid):
     else:
         raise ValueError(f't too big: {t}')
     return idx
+
+
+def _normalize(v):
+    """Normalize a vector."""
+    assert _np.ndim(v) == 1
+    return v / _np.linalg.norm(v)
 
 
 def _check_vertices(vertices, *, closed):
