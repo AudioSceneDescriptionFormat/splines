@@ -6,4 +6,5 @@ NumPy
 SymPy
 SciPy
 matplotlib>=2.1
+ipyvolume
 sphinxcontrib-bibtex
