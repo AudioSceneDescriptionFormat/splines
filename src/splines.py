@@ -156,7 +156,9 @@ def _check_t(t, grid):
 def _normalize(v):
     """Normalize a vector."""
     assert _np.ndim(v) == 1
-    return v / _np.linalg.norm(v)
+    # Disable warning for zero-length vectors which lead to NaN values:
+    with _np.errstate(invalid='ignore'):
+        return v / _np.linalg.norm(v)
 
 
 def _check_vertices(vertices, *, closed):
