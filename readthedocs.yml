@@ -8,4 +8,5 @@ python:
 
 requirements_file: doc/requirements.txt
 
-formats: []
+formats:
+  - pdf
