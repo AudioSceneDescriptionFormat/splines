@@ -21,7 +21,10 @@ master_doc = 'index'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 pygments_style = 'sphinx'
 
-nbsphinx_execute_arguments = ['--InlineBackend.figure_formats={"png", "pdf"}']
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
 
 if_docname = """
 {% set docname = env.doc2path(env.docname, base=None) %}
