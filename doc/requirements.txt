@@ -6,3 +6,4 @@ NumPy
 git+https://github.com/mgeier/sympy.git@better-latex-printing
 SciPy
 matplotlib>=2.1
+sphinxcontrib-bibtex

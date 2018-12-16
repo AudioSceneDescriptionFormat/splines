@@ -10,6 +10,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'nbsphinx',
+    'sphinxcontrib.bibtex',
 ]
 
 highlight_language = 'none'
@@ -78,6 +79,22 @@ nbsphinx_epilog = if_docname(r"""
     \textcolor{gray}{\dotfill\ {{ latex_href }} ends here.}}
 """)
 
+# -- Work-around to get LaTeX References at the same place as HTML --------
+
+# See https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
+
+import docutils
+import sphinx.builders.latex
+
+class DummyTransform(docutils.transforms.Transform):
+
+    default_priority = 0
+
+    def apply(self):
+        pass
+
+sphinx.builders.latex.BibliographyTransform = DummyTransform
+
 # -- Get version information and date from Git ----------------------------
 
 try:
@@ -143,6 +160,8 @@ latex_domain_indices = False
 latex_documents = [
     (master_doc, 'PiecewisePolynomialCurves.tex', project, author, 'howto'),
 ]
+
+latex_additional_files = ['references.bib']
 
 # -- Options for Epub output -------------------------------------------------
 
