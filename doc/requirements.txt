@@ -3,6 +3,6 @@ sphinx_bootstrap_theme
 nbsphinx
 ipykernel
 NumPy
-SymPy
+git+https://github.com/mgeier/sympy.git@better-latex-printing
 SciPy
 matplotlib>=2.1
