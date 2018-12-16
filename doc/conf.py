@@ -26,20 +26,30 @@ nbsphinx_execute_arguments = [
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
 
-if_docname = """
+
+def if_docname(text):
+    return """
 {% set docname = env.doc2path(env.docname, base=None) %}
 {% if docname not in [
     'index.ipynb',
     'catmull-rom.ipynb',
 ] %}
 {% set docname = 'doc/' + docname %}
-"""
-
-endif = """
+{% set latex_href = ''.join([
+    '\href{https://github.com/AudioSceneDescriptionFormat/splines/blob/',
+    env.config.release,
+    '/',
+    docname | escape_latex,
+    '}{\sphinxcode{\sphinxupquote{',
+    docname | escape_latex,
+    '}}}',
+]) %}
+""" + text + """
 {% endif %}
 """
 
-nbsphinx_prolog = if_docname + r"""
+
+nbsphinx_prolog = if_docname(r"""
 .. only:: html
 
     .. role:: raw-html(raw)
@@ -57,17 +67,16 @@ nbsphinx_prolog = if_docname + r"""
 .. raw:: latex
 
     \nbsphinxstartnotebook{\scriptsize\noindent\strut
-    \textcolor{gray}{The following section was generated from
-    \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
-""" + endif
+    \textcolor{gray}{The following section was generated from {{ latex_href }}
+    \dotfill}}
+""")
 
-nbsphinx_epilog = if_docname + r"""
+nbsphinx_epilog = if_docname(r"""
 .. raw:: latex
 
     \nbsphinxstopnotebook{\scriptsize\noindent\strut
-    \textcolor{gray}{\dotfill\ \sphinxcode{\sphinxupquote{\strut
-    {{ docname | escape_latex }}}} ends here.}}
-""" + endif
+    \textcolor{gray}{\dotfill\ {{ latex_href }} ends here.}}
+""")
 
 # -- Get version information and date from Git ----------------------------
 
