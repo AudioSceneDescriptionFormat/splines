@@ -49,28 +49,24 @@ nbsphinx_prolog = if_docname + r"""
 
         This page was generated from `{{ docname }}`__.
         Interactive online version:
-        :raw-html:`<a href="https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/{{ env.config.release }}?filepath={{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge.svg" style="vertical-align:text-bottom"></a>`
+        :raw-html:`<a href="https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/{{ env.config.release }}?filepath={{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
 
     __ https://github.com/AudioSceneDescriptionFormat/splines/blob/
         {{ env.config.release }}/{{ docname }}
 
 .. raw:: latex
 
-    \vfil\penalty-1\vfilneg
-    \vspace{\baselineskip}
+    \nbsphinxstartnotebook{\scriptsize\noindent\strut
     \textcolor{gray}{The following section was generated from
-    \texttt{\strut {{ docname }}}\\[-0.5\baselineskip]
-    \noindent\rule{\textwidth}{0.4pt}}
-    \vspace{-2\baselineskip}
+    \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
 """ + endif
 
 nbsphinx_epilog = if_docname + r"""
 .. raw:: latex
 
-    \textcolor{gray}{\noindent\rule{\textwidth}{0.4pt}\\
-    \hbox{}\hfill End of
-    \texttt{\strut{}{{ docname }}}}
-    \vfil\penalty-1\vfilneg
+    \nbsphinxstopnotebook{\scriptsize\noindent\strut
+    \textcolor{gray}{\dotfill\ \sphinxcode{\sphinxupquote{\strut
+    {{ docname | escape_latex }}}} ends here.}}
 """ + endif
 
 # -- Get version information and date from Git ----------------------------
@@ -102,11 +98,24 @@ html_theme_options = {
 html_domain_indices = False
 html_show_sourcelink = True
 
+mathjax_config = {
+    'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
+}
+
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
     'papersize': 'a4paper',
     'printindex': '',
+    'sphinxsetup': r"""
+        VerbatimColor={HTML}{F5F5F5},
+        VerbatimBorderColor={HTML}{E0E0E0},
+        noteBorderColor={HTML}{E0E0E0},
+        noteborder=1.5pt,
+        warningBorderColor={HTML}{E0E0E0},
+        warningborder=1.5pt,
+        warningBgColor={HTML}{FBFBFB},
+    """,
     'preamble': r"""
 \usepackage[sc,osf]{mathpazo}
 \linespread{1.05}  % see http://www.tug.dk/FontCatalogue/urwpalladio/
