@@ -1,5 +1,5 @@
 Sphinx>=1.8
-sphinx_bootstrap_theme
+sphinx_rtd_theme
 nbsphinx
 ipykernel
 NumPy
