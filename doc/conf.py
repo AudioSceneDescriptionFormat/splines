@@ -1,5 +1,4 @@
 from ipywidgets.embed import DEFAULT_EMBED_REQUIREJS_URL
-import sphinx_bootstrap_theme
 
 project = 'Piecewise Polynomial Curves'
 author = 'Matthias Geier'
