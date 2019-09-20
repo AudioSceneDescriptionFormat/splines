@@ -3,7 +3,7 @@ sphinx_rtd_theme
 nbsphinx
 ipykernel
 NumPy
-git+https://github.com/mgeier/sympy.git@better-latex-printing
+SymPy
 SciPy
 matplotlib>=2.1
 sphinxcontrib-bibtex
