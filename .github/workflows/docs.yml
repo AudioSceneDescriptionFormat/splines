@@ -1,0 +1,43 @@
+name: Build Docs with Sphinx
+on: [push, pull_request]
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install pandoc
+      run: |
+        sudo apt-get install pandoc
+    - name: Check Python version
+      run: |
+        python3 --version
+    - name: Install setuptools
+      run: |
+        python3 -m pip install setuptools
+    - name: Install Python package
+      run: |
+        python3 -m pip install .
+    - name: Install docs dependencies
+      run: |
+        python3 -m pip install -r doc/requirements.txt
+    - name: Build HTML
+      run: |
+        python3 -m sphinx doc/ _build/html/ -d _doctrees/ -W -b html
+    - name: Upload HTML
+      uses: actions/upload-artifact@v2
+      with:
+        name: HTML
+        path: _build/html/
+    - name: Build LaTeX sources
+      run: |
+        python3 -m sphinx doc/ _build/latex/ -d _doctrees/ -W -b latex
+    - name: Run LaTeX
+      uses: dante-ev/latex-action@master
+      with:
+        working_directory: _build/latex
+        root_file: PiecewisePolynomialCurves.tex
+    - name: Upload PDF
+      uses: actions/upload-artifact@v2
+      with:
+        name: PDF
+        path: _build/latex/PiecewisePolynomialCurves.pdf
