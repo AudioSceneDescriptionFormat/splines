@@ -1,6 +1,7 @@
 """Piecewise Polynomial Curves.
 
 """
+from itertools import accumulate as _accumulate
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
 import numpy as _np
 
@@ -41,6 +42,7 @@ class PiecewiseCurve:
         self.segments = [_np.array(coefficients, copy=True)
                          for coefficients in segments]
         self.grid = list(grid)
+        self.s_grid = None
 
     def evaluate(self, t, n=0):
         """Get value (or n-th derivative) at given time(s)."""
@@ -56,6 +58,64 @@ class PiecewiseCurve:
         product = _np.multiply.reduce
         weights = product([powers + 1 + i for i in range(n)]) / (t1 - t0)**n
         return t**powers * weights @ coefficients
+
+    def segment_length(self, idx, *, t0=None, t1=None):
+        """Arc length of given curve segment.
+
+        If specified, *t0* and *t1* must be within the given segment.
+        If not, they are set to the beginning and end time of the given
+        segment, respectively.
+
+        """
+        from scipy import integrate
+        if not 0 <= idx < len(self.segments):
+            raise ValueError(f'invalid idx: {idx}')
+        if t0 is None:
+            t0 = self.grid[idx]
+        if t1 is None:
+            t1 = self.grid[idx + 1]
+        if not self.grid[idx] <= t0 <= t1 <= self.grid[idx + 1]:
+            raise ValueError('Invalid t0 or t1')
+
+        def speed(t):
+            return _np.linalg.norm(self.evaluate(t, 1), axis=-1)
+
+        value, abserr = integrate.quad(speed, t0, t1)
+        return value
+
+    def calculate_s_grid(self):
+        """Calculate arc length values for all (time) grid values.
+
+        Those values are then provided by the `s_grid` attribute.
+
+        This is automatically called by `s2t()` if needed.
+
+        """
+        lengths = (self.segment_length(i) for i in range(len(self.segments)))
+        self.s_grid = list(_accumulate(lengths, initial=0))
+
+    def s2t(self, s):
+        """Convert arc length to time value."""
+        if not _np.isscalar(s):
+            return _np.array([self.s2t(arc_length) for arc_length in s])
+        if self.s_grid is None:
+            self.calculate_s_grid()
+        if s < self.s_grid[0]:
+            raise ValueError(f'too small s: {s}')
+        if s == self.s_grid[-1]:
+            return self.grid[-1]
+        if s > self.s_grid[-1]:
+            raise ValueError(f'too large s: {s}')
+        idx = _bisect_right(self.s_grid, s) - 1
+        s -= self.s_grid[idx]
+        t0 = self.grid[idx]
+        t1 = self.grid[idx + 1]
+
+        def length(t):
+            return self.segment_length(idx, t0=t0, t1=t) - s
+
+        from scipy.optimize import bisect
+        return bisect(length, t0, t1)
 
 
 def _check_t(t, grid):
