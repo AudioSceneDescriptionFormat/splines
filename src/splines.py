@@ -42,14 +42,13 @@ class PiecewiseCurve:
         self.segments = [_np.array(coefficients, copy=True)
                          for coefficients in segments]
         self.grid = list(grid)
-        self.s_grid = None
 
     def evaluate(self, t, n=0):
         """Get value (or n-th derivative) at given time(s)."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(time, n) for time in t])
 
-        idx = _check_t(t, self.grid)
+        idx = _check_param('t', t, self.grid)
 
         t0, t1 = self.grid[idx:idx + 2]
         t = (t - t0) / (t1 - t0)
@@ -63,11 +62,10 @@ class PiecewiseCurve:
         """Arc length of given curve segment.
 
         If specified, *t0* and *t1* must be within the given segment.
-        If not, they are set to the beginning and end time of the given
-        segment, respectively.
+        If not specified, they are set to the beginning and end time of
+        the given segment, respectively.
 
         """
-        from scipy import integrate
         if not 0 <= idx < len(self.segments):
             raise ValueError(f'invalid idx: {idx}')
         if t0 is None:
@@ -80,53 +78,20 @@ class PiecewiseCurve:
         def speed(t):
             return _np.linalg.norm(self.evaluate(t, 1), axis=-1)
 
+        from scipy import integrate
         value, abserr = integrate.quad(speed, t0, t1)
         return value
 
-    def calculate_s_grid(self):
-        """Calculate arc length values for all (time) grid values.
 
-        Those values are then provided by the `s_grid` attribute.
-
-        This is automatically called by `s2t()` if needed.
-
-        """
-        lengths = (self.segment_length(i) for i in range(len(self.segments)))
-        self.s_grid = list(_accumulate(lengths, initial=0))
-
-    def s2t(self, s):
-        """Convert arc length to time value."""
-        if not _np.isscalar(s):
-            return _np.array([self.s2t(arc_length) for arc_length in s])
-        if self.s_grid is None:
-            self.calculate_s_grid()
-        if s < self.s_grid[0]:
-            raise ValueError(f'too small s: {s}')
-        if s == self.s_grid[-1]:
-            return self.grid[-1]
-        if s > self.s_grid[-1]:
-            raise ValueError(f'too large s: {s}')
-        idx = _bisect_right(self.s_grid, s) - 1
-        s -= self.s_grid[idx]
-        t0 = self.grid[idx]
-        t1 = self.grid[idx + 1]
-
-        def length(t):
-            return self.segment_length(idx, t0=t0, t1=t) - s
-
-        from scipy.optimize import bisect
-        return bisect(length, t0, t1)
-
-
-def _check_t(t, grid):
-    if t < grid[0]:
-        raise ValueError(f't too small: {t}')
-    elif t < grid[-1]:
-        idx = _bisect_right(grid, t) - 1
-    elif t == grid[-1]:
+def _check_param(name, param, grid):
+    if param < grid[0]:
+        raise ValueError(f'{name} too small: {param}')
+    elif param < grid[-1]:
+        idx = _bisect_right(grid, param) - 1
+    elif param == grid[-1]:
         idx = len(grid) - 2
     else:
-        raise ValueError(f't too big: {t}')
+        raise ValueError(f'{name} too big: {param}')
     return idx
 
 
@@ -525,7 +490,7 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         values), None is returned.
 
         """
-        values = self(self.grid)
+        values = self.evaluate(self.grid)
         if values[0] <= value <= values[-1]:
             # Increasing values
 
@@ -557,3 +522,58 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         time, = roots.real
         t0, t1 = self.grid[idx:idx + 2]
         return time * (t1 - t0) + t0
+
+
+class ArcLengthReParameterizedCurve:
+
+    def __init__(self, curve):
+        lengths = (curve.segment_length(i) for i in range(len(curve.segments)))
+        self.grid = list(_accumulate(lengths, initial=0))
+        self.curve = curve
+
+    def _s2t(self, s):
+        """Convert arc length to time value."""
+        idx = _check_param('s', s, self.grid)
+        s -= self.grid[idx]
+        t0 = self.curve.grid[idx]
+        t1 = self.curve.grid[idx + 1]
+
+        def length(t):
+            return self.curve.segment_length(idx, t0=t0, t1=t) - s
+
+        from scipy.optimize import bisect
+        return bisect(length, t0, t1)
+
+    def evaluate(self, s, n=0):
+        if not _np.isscalar(s):
+            return _np.array([self.evaluate(s, n) for s in s])
+        return self.curve.evaluate(self._s2t(s), n)
+
+
+class ReParameterizedCurve:
+
+    def __init__(self, curve, new_grid=1):
+        if _np.isscalar(new_grid):
+            new_grid = [0] + [None] * (len(curve.grid) - 2) + [new_grid]
+        if len(new_grid) != len(curve.grid):
+            raise ValueError('new_grid must have same length as curve.grid')
+        if new_grid[0] is None or new_grid[-1] is None:
+            raise TypeError('first/last element of new_grid cannot be None')
+        # TODO: allow NaN?
+        old_values = []
+        new_values = []
+        for old, new in zip(curve.grid, new_grid):
+            if new is None:
+                continue
+            new_values.append(new)
+            old_values.append(old)
+
+        self._new2old = MonotoneCubic1D(old_values, grid=new_values)
+        self.grid = [self._new2old.get_time(old) for old in curve.grid]
+        self.curve = curve
+
+    def evaluate(self, u, n=0):
+        if not _np.isscalar(u):
+            return _np.array([self.evaluate(u, n) for u in u])
+        idx = _check_param('u', u, self.grid)
+        return self.curve.evaluate(self._new2old.evaluate(u))
