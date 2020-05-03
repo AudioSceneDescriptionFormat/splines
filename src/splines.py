@@ -559,17 +559,19 @@ class ReParameterizedCurve:
             raise ValueError('new_grid must have same length as curve.grid')
         if new_grid[0] is None or new_grid[-1] is None:
             raise TypeError('first/last element of new_grid cannot be None')
-        # TODO: allow NaN?
-        old_values = []
-        new_values = []
+        old_values, new_values = [], []
         for old, new in zip(curve.grid, new_grid):
+            # TODO: allow NaN?
             if new is None:
                 continue
             new_values.append(new)
             old_values.append(old)
-
         self._new2old = MonotoneCubic1D(old_values, grid=new_values)
-        self.grid = [self._new2old.get_time(old) for old in curve.grid]
+        self.grid = []
+        for old, new in zip(curve.grid, new_grid):
+            if new is None:
+                new = self._new2old.get_time(old)
+            self.grid.append(new)
         self.curve = curve
 
     def evaluate(self, u, n=0):
