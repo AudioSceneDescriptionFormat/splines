@@ -58,30 +58,6 @@ class PiecewiseCurve:
         weights = product([powers + 1 + i for i in range(n)]) / (t1 - t0)**n
         return t**powers * weights @ coefficients
 
-    def segment_length(self, idx, *, t0=None, t1=None):
-        """Arc length of given curve segment.
-
-        If specified, *t0* and *t1* must be within the given segment.
-        If not specified, they are set to the beginning and end time of
-        the given segment, respectively.
-
-        """
-        if not 0 <= idx < len(self.segments):
-            raise ValueError(f'invalid idx: {idx}')
-        if t0 is None:
-            t0 = self.grid[idx]
-        if t1 is None:
-            t1 = self.grid[idx + 1]
-        if not self.grid[idx] <= t0 <= t1 <= self.grid[idx + 1]:
-            raise ValueError('Invalid t0 or t1')
-
-        def speed(t):
-            return _np.linalg.norm(self.evaluate(t, 1), axis=-1)
-
-        from scipy import integrate
-        value, abserr = integrate.quad(speed, t0, t1)
-        return value
-
 
 def _check_param(name, param, grid):
     if param < grid[0]:
@@ -524,22 +500,55 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         return time * (t1 - t0) + t0
 
 
-class ArcLengthReParameterizedCurve:
+class ConstantSpeedAdapter:
+    """Re-parameterize a spline to have constant speed.
+
+    For splines in Euclidean space this amounts to arc-length
+    parameterization.
+
+    However, this class is implemented in a way that also allows using
+    rotation splines which will be re-parameterized to have constant
+    angular speed.
+
+    The parameter *s* represents the cumulative arc-length or the
+    cumulative rotation angle, respectively.
+
+    """
 
     def __init__(self, curve):
-        lengths = (curve.segment_length(i) for i in range(len(curve.segments)))
-        self.grid = list(_accumulate(lengths, initial=0))
         self.curve = curve
+        lengths = (
+            self._integrated_speed(i, t0, t1)
+            for i, (t0, t1) in enumerate(zip(curve.grid, curve.grid[1:])))
+        self.grid = list(_accumulate(lengths, initial=0))
+
+    def _integrated_speed(self, idx, t0, t1):
+        """Integral over the speed on a curve segment.
+
+        *t0* and *t1* must be within the given segment.
+
+        """
+        if not 0 <= idx < len(self.curve.grid) - 1:
+            raise ValueError(f'invalid idx: {idx}')
+        if not self.curve.grid[idx] <= t0 <= t1 <= self.curve.grid[idx + 1]:
+            raise ValueError('Invalid t0 or t1')
+
+        def speed(t):
+            return _np.linalg.norm(self.curve.evaluate(t, 1), axis=-1)
+
+        from scipy import integrate
+        value, abserr = integrate.quad(speed, t0, t1)
+        return value
 
     def _s2t(self, s):
-        """Convert arc length to time value."""
+        """Convert integrated speed to time value."""
         idx = _check_param('s', s, self.grid)
         s -= self.grid[idx]
         t0 = self.curve.grid[idx]
         t1 = self.curve.grid[idx + 1]
 
         def length(t):
-            return self.curve.segment_length(idx, t0=t0, t1=t) - s
+            return self._integrated_speed(idx, t0, t) - s
 
         from scipy.optimize import bisect
         return bisect(length, t0, t1)
@@ -550,7 +559,7 @@ class ArcLengthReParameterizedCurve:
         return self.curve.evaluate(self._s2t(s), n)
 
 
-class ReParameterizedCurve:
+class NewGridAdapter:
 
     def __init__(self, curve, new_grid=1):
         if _np.isscalar(new_grid):
