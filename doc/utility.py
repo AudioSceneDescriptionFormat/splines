@@ -110,7 +110,8 @@ class NamedExpression(sp.Equality):
         # NB: This ignores the subclass and just returns a NamedExpression:
         return NamedExpression(
             self.name,
-            sp.Mul(expr, sp.simplify(self.expr / expr), evaluate=False))
+            sp.UnevaluatedExpr(expr) *
+            sp.UnevaluatedExpr(sp.simplify(self.expr / expr)))
 
 
 class NamedMatrix(NamedExpression):
