@@ -86,6 +86,17 @@ class NamedExpression(sp.Equality):
             self.name.subs(*args, **kwargs),
             self.expr.subs(*args, **kwargs))
 
+    def evaluated_at(self, old, new, symbols=()):
+        new_expr = self.expr.subs(old, new)
+        for symbol in symbols:
+            new_expr = new_expr.subs(
+                symbol.name, symbol.evaluated_at(old, new).name)
+        return self.func(
+            r'\left.{' + sp.latex(self.name) + r'}\right\rvert_{' +
+            sp.latex(old) + '=' + sp.latex(new) + '}',
+            new_expr
+        )
+
     def simplify(self, *args, **kwargs):
         return self.func(self.name, sp.simplify(self.expr, *args, **kwargs))
 
