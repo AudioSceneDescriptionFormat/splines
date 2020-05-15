@@ -54,37 +54,13 @@ class NamedExpression(sp.Equality):
     def _args(self):
         return self.name, self.expr
 
-    def doit(self):
-        return self.func(self.name.doit(), self.expr.doit())
-
-    def subs(self, *args, **kwargs):
-        if len(args) == 1:
-            arg = args[0]
-            if isinstance(arg, NamedExpression):
-                args = [[(arg.name, arg.expr)]]
-            else:
-                new_arg = []
-
-                if isinstance(arg, (Dict, Mapping)):
-                    pass  # Nothing to do
-                else:
-                    try:
-                        for s in arg:
-                            if isinstance(s, NamedExpression):
-                                new_arg.append((s.name, s.expr))
-                            else:
-                                new_arg.append(s)
-                    except TypeError:
-                        pass  # Nothing to do, SymPy will raise
-                    else:
-                        if isinstance(arg, set):
-                            new_arg = set(new_arg)
-                        args = [new_arg]
-        elif len(args) == 2:
-            pass  # Nothing to do
-        return self.func(
-            self.name.subs(*args, **kwargs),
-            self.expr.subs(*args, **kwargs))
+    def subs_symbols(self, *args, **kwargs):
+        substitutions = []
+        for arg in args:
+            if not isinstance(arg, NamedExpression):
+                raise TypeError('args must be of type NamedExpression')
+            substitutions.append((arg.lhs, arg.rhs))
+        return self.subs(substitutions, **kwargs)
 
     def evaluated_at(self, old, new, symbols=()):
         new_expr = self.expr.subs(old, new)
@@ -97,21 +73,37 @@ class NamedExpression(sp.Equality):
             new_expr
         )
 
-    def simplify(self, *args, **kwargs):
-        return self.func(self.name, sp.simplify(self.expr, *args, **kwargs))
-
-    def factor(self, *args, **kwargs):
-        return self.func(self.name, sp.factor(self.expr, *args, **kwargs))
-
-    def expand(self, *args, **kwargs):
-        return self.func(self.name, sp.expand(self.expr, *args, **kwargs))
-
     def pull_out(self, expr):
         # NB: This ignores the subclass and just returns a NamedExpression:
         return NamedExpression(
             self.name,
             sp.UnevaluatedExpr(expr) *
             sp.UnevaluatedExpr(sp.simplify(self.expr / expr)))
+
+    def _call_function(self, func, *args, **kwargs):
+        return self.func(
+            func(self.name, *args, **kwargs),
+            func(self.expr, *args, **kwargs))
+
+    def simplify(self, *args, **kwargs):
+        return self._call_function(sp.simplify, *args, **kwargs)
+
+    def factor(self, *args, **kwargs):
+        return self._call_function(sp.factor, *args, **kwargs)
+
+    def expand(self, *args, **kwargs):
+        return self._call_function(sp.expand, *args, **kwargs)
+
+    def _call_method(self, name, *args, **kwargs):
+        return self.func(
+            getattr(self.name, name)(*args, **kwargs),
+            getattr(self.expr, name)(*args, **kwargs))
+
+    def doit(self, *args, **kwargs):
+        return self._call_method('doit', *args, **kwargs)
+
+    def subs(self, *args, **kwargs):
+        return self._call_method('subs', *args, **kwargs)
 
 
 class NamedMatrix(NamedExpression):
@@ -202,10 +194,11 @@ class NamedMatrix(NamedExpression):
     def det(self):
         return NamedExpression(sp.det(self.name), sp.det(self.expr))
 
-    def simplify(self, *args, **kwargs):
-        return self.func(self.name,
-                         sp.MatrixBase.simplify(self.expr, *args, **kwargs))
-
+    def factor(self, *args, **kwargs):
+        return self.func(
+            sp.factor(self.name, *args, **kwargs),
+            # https://github.com/sympy/sympy/issues/19331
+            self.expr.applyfunc(lambda elem: sp.factor(elem, *args, **kwargs)))
 
 def _inverse(expr):
     if expr is None:
