@@ -1,5 +1,5 @@
 Sphinx>=2
-sphinx_rtd_theme
+insipid-sphinx-theme
 nbsphinx
 ipykernel
 NumPy
@@ -7,3 +7,4 @@ SymPy
 SciPy
 matplotlib>=2.1
 sphinxcontrib-bibtex
+sphinx-last-updated-by-git

@@ -10,6 +10,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'nbsphinx',
     'sphinxcontrib.bibtex',
+    'sphinx_last_updated_by_git',
 ]
 
 html_sourcelink_suffix = ''
@@ -119,13 +120,10 @@ except Exception:
 # -- Options for HTML output -------------------------------------------------
 
 html_title = project + ', version ' + release
-html_theme = 'sphinx_rtd_theme'
-html_theme_options = {
-    'collapse_navigation': False,
-}
+html_theme = 'insipid'
 html_domain_indices = False
-html_show_sourcelink = True
 html_favicon = 'favicon.svg'
+html_copy_source = False
 
 mathjax_config = {
     'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
