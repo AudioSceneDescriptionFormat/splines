@@ -80,6 +80,13 @@ class NamedExpression(sp.Equality):
             sp.UnevaluatedExpr(expr) *
             sp.UnevaluatedExpr(sp.simplify(self.expr / expr)))
 
+    def diff(self, variable):
+        return self.func(
+            sp.Symbol(
+                r'\frac{d ' + sp.latex(self.name) +
+                '}{d ' + sp.latex(variable)+ '}'),
+            self.expr.diff(variable))
+
     def _call_function(self, func, *args, **kwargs):
         return self.func(
             func(self.name, *args, **kwargs),
