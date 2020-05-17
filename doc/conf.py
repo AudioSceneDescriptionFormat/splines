@@ -1,6 +1,6 @@
 project = 'Piecewise Polynomial Curves'
 author = 'Matthias Geier'
-copyright = '2018, ' + author
+copyright = '2020, ' + author
 
 extensions = [
     'sphinx.ext.autodoc',
