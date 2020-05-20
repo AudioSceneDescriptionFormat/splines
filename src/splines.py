@@ -3,6 +3,8 @@
 """
 from itertools import accumulate as _accumulate
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
+from math import factorial as _factorial
+
 import numpy as _np
 
 __version__ = '0.0'
@@ -41,6 +43,8 @@ class PiecewiseCurve:
         """
         self.segments = [_np.array(coefficients, copy=True)
                          for coefficients in segments]
+        if grid is None:
+            grid = range(len(segments) + 1)
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
@@ -59,6 +63,39 @@ class PiecewiseCurve:
         return t**powers * weights @ coefficients
 
 
+class PiecewiseBezierCurve:
+    """
+    """
+
+    def __init__(self, segments, grid=None):
+        """
+
+        *grid* must be strictly increasing.
+
+        Different segments can have different numbers of control points.
+
+        """
+        self.segments = [_np.array(control_points, copy=True)
+                         for control_points in segments]
+        if grid is None:
+            grid = range(len(segments) + 1)
+        self.grid = list(grid)
+
+    def evaluate(self, t, n=0):
+        if n != 0:
+            raise NotImplementedError('Derivatives are not implemented yet')
+        if not _np.isscalar(t):
+            return _np.array([self.evaluate(time, n) for time in t])
+        idx = _check_param('t', t, self.grid)
+        t0, t1 = self.grid[idx:idx + 2]
+        t = (t - t0) / (t1 - t0)
+        control_points = self.segments[idx]
+        degree = len(control_points) - 1
+        return sum(
+            a * b
+            for a, b in zip(control_points, _bernstein_bases(degree, t)))
+
+
 def _check_param(name, param, grid):
     if param < grid[0]:
         raise ValueError(f'{name} too small: {param}')
@@ -69,6 +106,17 @@ def _check_param(name, param, grid):
     else:
         raise ValueError(f'{name} too big: {param}')
     return idx
+
+
+def _bernstein_bases(degree, t):
+    return [
+        _comb(degree, i) * t**i * (1 - t)**(degree - i)
+        for i in range(degree + 1)]
+
+
+def _comb(n, k):
+    # NB: Python 3.8 has math.comb()
+    return _factorial(n) // _factorial(k) // _factorial(n - k)
 
 
 def _check_vertices(vertices, *, closed):
