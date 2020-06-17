@@ -11,14 +11,19 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-highlight_language = 'none'
 html_sourcelink_suffix = ''
 
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 master_doc = 'index'
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 pygments_style = 'sphinx'
+
+autoclass_content = 'both'  # class/init/both
+autodoc_member_order = 'bysource'
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+}
 
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",

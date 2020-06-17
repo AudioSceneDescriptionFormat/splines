@@ -2,18 +2,18 @@ from setuptools import setup
 
 # "import" __version__
 __version__ = 'unknown'
-for line in open('src/splines.py'):
+for line in open('src/splines/__init__.py'):
     if line.startswith('__version__'):
         exec(line)
         break
 
 setup(
     name='splines',
-    py_modules=['splines'],
+    packages=['splines'],
     version=__version__,
     author='Matthias Geier',
     author_email='Matthias.Geier@gmail.com',
-    description='Piecewise Polynomial Curves',
+    description='Splines',
     long_description=open('README.rst').read(),
     package_dir={'': 'src'},
     install_requires=['NumPy'],

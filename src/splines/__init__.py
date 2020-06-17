@@ -1,11 +1,10 @@
-"""Piecewise Polynomial Curves.
-
-"""
-from itertools import accumulate as _accumulate
+"""Splines."""
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
+from itertools import accumulate as _accumulate
 from math import factorial as _factorial
 
 import numpy as _np
+
 
 __version__ = '0.0'
 
@@ -546,8 +545,6 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         time, = roots.real
         t0, t1 = self.grid[idx:idx + 2]
         return time * (t1 - t0) + t0
-
-
 class ConstantSpeedAdapter:
     """Re-parameterize a spline to have constant speed.
 
@@ -608,6 +605,7 @@ class ConstantSpeedAdapter:
 
 
 class NewGridAdapter:
+    """Re-parameterize a spline with new grid values."""
 
     def __init__(self, curve, new_grid=1):
         if _np.isscalar(new_grid):
