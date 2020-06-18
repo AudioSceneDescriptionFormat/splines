@@ -1,10 +1,8 @@
 Python Module
 =============
 
-.. automodule:: splines
+.. autosummary::
+    :toctree: python-module
 
-
-Quaternion Sub-Module
----------------------
-
-.. automodule:: splines.quaternion
+    splines
+    splines.quaternion

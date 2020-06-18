@@ -4,6 +4,7 @@ copyright = '2020, ' + author
 
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
@@ -13,17 +14,22 @@ extensions = [
 
 html_sourcelink_suffix = ''
 
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+}
 
 master_doc = 'index'
-pygments_style = 'sphinx'
 
-autoclass_content = 'both'  # class/init/both
+autosummary_generate = ['python-module']
+autoclass_content = 'init'
 autodoc_member_order = 'bysource'
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
 }
+
+default_role = 'any'
 
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",

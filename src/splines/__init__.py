@@ -1,4 +1,12 @@
-"""Splines."""
+"""Piecewise polynomial curves (in Euclidean space).
+
+.. rubric:: Submodules
+
+.. autosummary::
+
+    quaternion
+
+"""
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left
 from itertools import accumulate as _accumulate
 from math import factorial as _factorial
@@ -10,34 +18,33 @@ __version__ = '0.0'
 
 
 class PiecewiseCurve:
-    r"""
-
-    Arbitrary degree, arbitrary dimension.
-
-    Uses monomial basis.
-
-    .. math::
-
-        \boldsymbol{p}_i(t) = \sum_{k=0}^n
-            \boldsymbol{a}_k \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
-            \text{ for } t_i \leq t < t_{i+1}
-
-    Similar to https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PPoly.html,
-    which states:
-
-        "High-order polynomials in the power basis can be numerically
-        unstable.  Precision problems can start to appear for orders
-        larger than 20-30."
-
-    """
+    """Piecewise polynomial curve, see __init__()."""
 
     def __init__(self, segments, grid):
-        """
+        r"""Piecewise polynomial curve using monomial basis.
 
-        *grid* must be strictly increasing.
+        Arbitrary degree, arbitrary dimension.
 
-        Theoretically, different segments could have different
-        polynomial degree.
+        .. math::
+
+            \boldsymbol{p}_i(t) = \sum_{k=0}^n
+                \boldsymbol{a}_k \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
+                \text{ for } t_i \leq t < t_{i+1}
+
+        Similar to https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PPoly.html,
+        which states:
+
+            "High-order polynomials in the power basis can be numerically
+            unstable.  Precision problems can start to appear for orders
+            larger than 20-30."
+
+
+        :param segments: Sequence of polynomial segments.
+            Each segment contains coefficients for the monomial basis
+            (in order of decreasing degree).
+            Different segments can have different polynomial degree.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
 
         """
         self.segments = [_np.array(coefficients, copy=True)
@@ -47,7 +54,7 @@ class PiecewiseCurve:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
-        """Get value (or n-th derivative) at given time(s)."""
+        """Get value (or *n*-th derivative) at given time(s)."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(time, n) for time in t])
 
@@ -63,15 +70,16 @@ class PiecewiseCurve:
 
 
 class PiecewiseBezierCurve:
-    """
-    """
+    """Piecewise Bézier curve, see __init__()."""
 
     def __init__(self, segments, grid=None):
-        """
+        """Piecewise Bézier/Bernstein curve.
 
-        *grid* must be strictly increasing.
-
-        Different segments can have different numbers of control points.
+        :param segments: Sequence of segments,
+            each one consisting of multiple control points.
+            Different segments can have different numbers of control points.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
 
         """
         self.segments = [_np.array(control_points, copy=True)
@@ -220,13 +228,16 @@ def _natural_tangent(vertices, times, tangent):
 
 
 class CubicHermite(PiecewiseCurve):
+    """Cubic Hermite curve, see __init__()."""
 
     def __init__(self, vertices, tangents, grid=None):
-        """
+        """Cubic Hermite curve.
 
-        list of vertices
-        list of tangent vectors (two per segment, outgoing and incoming)
-        list of times
+        :param vertices: Sequence of vertices.
+        :param tangents: Sequence of tangent vectors
+            (two per segment, outgoing and incoming).
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
 
         """
         if len(vertices) < 2:
@@ -247,6 +258,7 @@ class CubicHermite(PiecewiseCurve):
 
 
 class CatmullRom(CubicHermite):
+    """Catmull--Rom spline, see __init__()."""
 
     # NB: Catmull-Rom could be implemented as special case of Kochanek-Bartels,
     #     but here we chose not to.
@@ -269,13 +281,16 @@ class CatmullRom(CubicHermite):
 
     def __init__(self, vertices, grid=None, *, alpha=None,
                  endconditions='natural'):
-        """
+        """Catmull--Rom spline.
 
-        endconditions: 'closed', 'natural' or pair of tangent vectors
-                        (a.k.a. "clamped")
-
-        If 'closed', the first vertex is re-used as last vertex and an
-        additional grid time has to be specified.
+        :param vertices: Sequence of vertices.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+        :param alpha: TODO
+        :param endconditions: Start/end conditions. Can be ``'closed'``,
+            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            If ``'closed'``, the first vertex is re-used as last vertex
+            and an additional *grid* time has to be specified.
 
         """
         closed = endconditions == 'closed'
@@ -294,6 +309,18 @@ class CatmullRom(CubicHermite):
 
 
 class FiniteDifference(CatmullRom):
+    """Finite difference spline, see __init__()."""
+
+    # NB: This function is only needed for creating the documentation:
+    def __init__(self, vertices, grid=None, *, alpha=None,
+                 endconditions='natural'):
+        """Finite difference spline.
+
+        Same parameters as `CatmullRom`.
+
+        """
+        super().__init__(
+            vertices, grid, alpha=alpha, endconditions=endconditions)
 
     @staticmethod
     def _calculate_tangent(points, times):
@@ -303,6 +330,7 @@ class FiniteDifference(CatmullRom):
 
 
 class KochanekBartels(CubicHermite):
+    """Kochanek--Bartels spline, see __init__()."""
 
     @staticmethod
     def _calculate_tangents(points, times, tcb):
@@ -327,9 +355,18 @@ class KochanekBartels(CubicHermite):
 
     def __init__(self, vertices, grid=None, *, tcb=(0, 0, 0), alpha=None,
                  endconditions='natural'):
-        """
+        """Kochanek--Bartels spline.
 
-        TCB values can only be given for the interior vertices.
+        :param vertices: Sequence of vertices.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+        :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
+            TCB values can only be given for the interior vertices.
+        :param alpha: TODO
+        :param endconditions: Start/end conditions. Can be ``'closed'``,
+            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            If ``'closed'``, the first vertex is re-used as last vertex
+            and an additional *grid* time has to be specified.
 
         """
         closed = endconditions == 'closed'
@@ -381,25 +418,28 @@ def _monotone_end_condition(inner_slope, chord_slope):
 
 
 class ShapePreservingCubic1D(FiniteDifference):
-    """
-
-    similar to https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html
-
-    """
+    """Shape-preserving cubic curve, see __init__()."""
 
     def __init__(self, values, grid=None, slopes=None, *, alpha=None,
                  closed=False):
-        """
+        """Shape-preserving cubic curve.
 
-        *slopes* is a list of slopes or None if slope should be computed
-        from neighboring values.
+        Similar to `scipy.interpolate.PchipInterpolator`.
 
-        For undefined slopes, _calculate_tangent() is called on the base
-        class.
+        This only works for one-dimensional values.
 
-        If no slopes are given, the curve also preserves
+        For undefined slopes, ``_calculate_tangent()`` is called on
+        the base class.
+
+        If no *slopes* are given, the curve also preserves
         concavity/convexity, otherwise it only preserves monotonicity
         and local extrema.
+
+        :param values: Sequence of values to be interpolated.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+        :param slopes: Sequence of slopes or ``None`` if slope should be
+            computed from neighboring values.
 
         """
         if len(values) < 2:
@@ -500,8 +540,14 @@ class ShapePreservingCubic1D(FiniteDifference):
 
 
 class MonotoneCubic1D(ShapePreservingCubic1D):
+    """Monotone cubic curve, see __init__()."""
 
     def __init__(self, values, *args, **kwargs):
+        """Monotone cubic curve.
+
+        Specialization of `ShapePreservingCubic1D`.
+
+        """
         # TODO: check if values are monotone
         ShapePreservingCubic1D.__init__(self, values, *args, **kwargs)
 
@@ -545,22 +591,25 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         time, = roots.real
         t0, t1 = self.grid[idx:idx + 2]
         return time * (t1 - t0) + t0
+
+
 class ConstantSpeedAdapter:
-    """Re-parameterize a spline to have constant speed.
-
-    For splines in Euclidean space this amounts to arc-length
-    parameterization.
-
-    However, this class is implemented in a way that also allows using
-    rotation splines which will be re-parameterized to have constant
-    angular speed.
-
-    The parameter *s* represents the cumulative arc-length or the
-    cumulative rotation angle, respectively.
-
-    """
+    """Re-parameterize a spline to have constant speed, see __init__()."""
 
     def __init__(self, curve):
+        """Re-parameterize a spline to have constant speed.
+
+        For splines in Euclidean space this amounts to arc-length
+        parameterization.
+
+        However, this class is implemented in a way that also allows using
+        rotation splines which will be re-parameterized to have constant
+        angular speed.
+
+        The parameter *s* represents the cumulative arc-length or the
+        cumulative rotation angle, respectively.
+
+        """
         self.curve = curve
         lengths = (
             self._integrated_speed(i, t0, t1)
@@ -605,9 +654,20 @@ class ConstantSpeedAdapter:
 
 
 class NewGridAdapter:
-    """Re-parameterize a spline with new grid values."""
+    """Re-parameterize a spline with new grid values, see __init__()."""
 
     def __init__(self, curve, new_grid=1):
+        """Re-parameterize a spline with new grid values.
+
+        :param curve: A spline.
+        :param new_grid: If a single number is given, the new parameter
+            will range from 0 to that number.  Otherwise, a sequence
+            of numbers has to be given, one for each grid value.
+            Instead of a value, ``None`` can be specified to choose a
+            value automatically.
+            The first and last value cannot be ``None``.
+
+        """
         if _np.isscalar(new_grid):
             new_grid = [0] + [None] * (len(curve.grid) - 2) + [new_grid]
         if len(new_grid) != len(curve.grid):

@@ -1,4 +1,4 @@
-"""Quaternions and quaternion splines."""
+"""Quaternions and unit-quaternion splines."""
 import math as _math
 
 import numpy as _np
@@ -6,6 +6,11 @@ from . import _check_param
 
 
 class Quaternion:
+    """A very simple quaternion class.
+
+    This is the base class for the more relevant `UnitQuaternion` class.
+
+    """
 
     __slots__ = '_scalar', '_vector'
 
@@ -55,10 +60,6 @@ class Quaternion:
             )
         )
 
-    def __rmul__(self, other):
-        """Disable inherited concatenation operator."""
-        return NotImplemented
-
     def __neg__(self):
         x, y, z = self.vector
         return Quaternion.__new__(type(self), -self.scalar, (-x, -y, -z))
@@ -74,6 +75,16 @@ class Quaternion:
             (x / norm, y / norm, z / norm, w / norm))
 
     def dot(self, other):
+        """Dot product of two quaternions.
+
+        This is the 4-dimensional dot product, yielding a scalar result.
+        This operation is commutative.
+
+        Note that this is different from the quaternion multiplication
+        (``q1 * q2``), which produces another quaternion
+        (and is non-commutative).
+
+        """
         return sum(map(_math.prod, zip(self.xyzw, other.xyzw)))
 
     @property
@@ -93,6 +104,7 @@ class Quaternion:
 
 
 class UnitQuaternion(Quaternion):
+    """Unit quaternion."""
 
     __slots__ = ()
 
@@ -101,10 +113,10 @@ class UnitQuaternion(Quaternion):
 
     @classmethod
     def from_axis_angle(cls, axis, angle):
-        """
+        """Create a unit quaternion from a rotation axis and angle.
 
-        *axis* will be normalized.
-        *angle* in radians.
+        :param axis: Three-component rotation axis. This will be normalized.
+        :param angle: Rotation angle in radians.
 
         """
         x, y, z = axis
@@ -114,9 +126,10 @@ class UnitQuaternion(Quaternion):
 
     @classmethod
     def from_unit_xyzw(cls, xyzw):
-        """
+        """Create a unit quaternion from another unit quaternion.
 
-        Input is *not* normalized!
+        :param xyzw: Components of a unit quaternion (scalar last).
+            This will *not* be normalized, it must already have unit length.
 
         """
         x, y, z, w = xyzw
@@ -129,11 +142,24 @@ class UnitQuaternion(Quaternion):
             return super().__new__(UnitQuaternion, self.scalar, self.vector)
         return UnitQuaternion.from_axis_angle(self.axis, alpha * self.angle)
 
-    # TODO: proper implementation to get meaningful docstring?
     inverse = Quaternion.conjugate
+    """Multiplicative inverse.
+
+    For unit quaternions, this is the same as `conjugate()`.
+
+    """
 
     @classmethod
     def exp_map(cls, value):
+        """Exponential map from :math:`R^3` to quaternions.
+
+        This is the inverse operation to `log_map()`.
+
+        :param value: Element of the tangent space at the quaternion identity.
+        :param type: 3-tuple
+        :returns: Corresponding unit quaternion.
+
+        """
         x, y, z = value
         norm = _math.sqrt(x**2 + y**2 + z**2)
         if norm == 0:
@@ -143,6 +169,13 @@ class UnitQuaternion(Quaternion):
         return super().__new__(cls, _math.cos(norm), (s * x, s * y, s * z))
 
     def log_map(self):
+        """Logarithmic map from quaternions to :math:`R^3`.
+
+        :returns: Corresponding vector in the tangent space at the
+            quaternion identity.
+        :rtype: 3-tuple
+
+        """
         length = self.angle / 2
         if self.scalar == 1:
             zero = 0 * self.scalar  # to get appropriate numeric type
@@ -168,9 +201,11 @@ class UnitQuaternion(Quaternion):
 
 
 def slerp(one, two, t):
-    """SLERP.
+    """Spherical linear interpolation.
 
-    *t* has to be between 0 and 1.
+    :param one: Start quaternion.
+    :param two: End quaternion.
+    :param t: Parameter value(s) between 0 and 1.
 
     """
     return (two * one.inverse())**t * one
@@ -187,8 +222,22 @@ def canonicalized(quaternions):
 
 
 class PiecewiseSlerp:
+    """Piecewise Slerp, see __init__()."""
 
     def __init__(self, rotations, *, grid=None, closed=False):
+        """Piecewise Slerp.
+
+        :param rotations: Sequence of quaternions to be interpolated.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+            Must have the same length as *rotations*, except when *closed*
+            is ``True``, where it must be one element longer.
+        :type grid: optional
+        :param closed: If ``True``, the first quaternion is repeated at
+            the end.
+        :type closed: optional
+
+        """
         rotations = list(rotations)
         if len(rotations) < 2:
             raise ValueError('At least two rotations are required')
@@ -204,7 +253,9 @@ class PiecewiseSlerp:
         self.rotations = rotations
         self.grid = list(grid)
 
-    def evaluate(self, t):
+    def evaluate(self, t, n=0):
+        if n != 0:
+            raise NotImplementedError('Derivatives are not implemented yet')
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t) for t in t])
         idx = _check_param('t', t, self.grid)
