@@ -176,6 +176,45 @@ def slerp(one, two, t):
     return (two * one.inverse())**t * one
 
 
+def canonicalized(quaternions):
+    """Iterator adapter to ensure minimal angles between quaternions."""
+    p = UnitQuaternion.from_unit_xyzw((0, 0, 0, 1))
+    for q in quaternions:
+        if p.dot(q) < 0:
+            q = -q
+        yield q
+        p = q
+
+
+class PiecewiseSlerp:
+
+    def __init__(self, rotations, *, grid=None, closed=False):
+        rotations = list(rotations)
+        if len(rotations) < 2:
+            raise ValueError('At least two rotations are required')
+        if closed:
+            rotations += rotations[:1]
+        rotations = list(canonicalized(rotations))
+        if grid is None:
+            grid = range(len(rotations))
+        if len(rotations) != len(grid):
+            raise ValueError(
+                'Number of grid values must be same as '
+                'rotations (one more for closed curves)')
+        self.rotations = rotations
+        self.grid = list(grid)
+
+    def evaluate(self, t):
+        if not _np.isscalar(t):
+            return _np.array([self.evaluate(t) for t in t])
+        idx = _check_param('t', t, self.grid)
+        t0, t1 = self.grid[idx:idx + 2]
+        return slerp(
+            self.rotations[idx],
+            self.rotations[idx + 1],
+            (t - t0) / (t1 - t0))
+
+
 class BezierSpline:
 
     def __init__(self, segments, grid=None):
@@ -209,7 +248,7 @@ class BezierSpline:
         t = (t - t0) / (t1 - t0)
         return t, self.segments[idx]
 
-        
+
 def _reduce(segment, t):
     """Obtain two quaternions for the last step of the algorithm.
 
