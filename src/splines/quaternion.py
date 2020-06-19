@@ -85,7 +85,9 @@ class Quaternion:
         (and is non-commutative).
 
         """
-        return sum(map(_math.prod, zip(self.xyzw, other.xyzw)))
+        # NB: math.prod() is available since Python 3.8
+        prod = _np.multiply.reduce
+        return sum(map(prod, zip(self.xyzw, other.xyzw)))
 
     @property
     def norm(self):
