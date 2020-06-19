@@ -155,32 +155,41 @@ def update_collections(collections, rotations, *, ls=None):
     return collections
 
 
-def plot_rotations(rotations, *, ax=None, ls=None):
-    if ax is None:
-        ax = plt.gca(projection='dumb3d')
-    object_width = 12
-    shift_x = object_width
-    _, _, x1, y1 = ax.bbox.bounds
-    aspect = x1 / y1
-    total_width = object_width * len(rotations)
-    total_height = total_width / aspect
-    ax.set_xlim(0, total_width)
-    ax.set_ylim(0, total_height)
-    x = object_width / 2
-    y = total_height / 2
-    z = 0
+def plot_rotations(rotations, *, figsize=None, ls=None):
+    if not isinstance(rotations, dict):
+        rotations = {'': rotations}
+    fig, axs = plt.subplots(
+        nrows=len(rotations),
+        squeeze=False,
+        figsize=figsize,
+        subplot_kw=dict(projection='dumb3d'),
+    )
     if ls is None:
         ls = LightSource()
-    for i, rot in enumerate(rotations):
-        coll = create_empty_collection(ax)
-        offset = [x + i * shift_x, y, z]
-        polys, facecolors = create_polys(rot, ls=ls)
-        polys += offset
-        coll.set_verts(polys)
-        coll.set_facecolors(facecolors)
+    for [ax], [title, rotations] in zip(axs, rotations.items()):
+        ax.set_title(title)
+        object_width = 12
+        shift_x = object_width
+        _, _, x1, y1 = ax.bbox.bounds
+        aspect = x1 / y1
+        total_width = object_width * len(rotations)
+        total_height = total_width / aspect
+        ax.set_xlim(0, total_width)
+        ax.set_ylim(0, total_height)
+        x = object_width / 2
+        y = total_height / 2
+        z = 0
+        for i, rot in enumerate(rotations):
+            coll = create_empty_collection(ax)
+            offset = [x + i * shift_x, y, z]
+            polys, facecolors = create_polys(rot, ls=ls)
+            polys += offset
+            coll.set_verts(polys)
+            coll.set_facecolors(facecolors)
+    plt.show()
 
 
-def animate_rotations(rotations, figsize=None, interval=40, **kwargs):
+def animate_rotations(rotations, *, figsize=None, interval=40, **kwargs):
     if not isinstance(rotations, dict):
         rotations = {'': rotations}
     collections = prepare_figure(rotations.keys(), figsize=figsize)
