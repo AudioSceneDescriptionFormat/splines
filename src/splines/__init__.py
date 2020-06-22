@@ -615,7 +615,10 @@ class ConstantSpeedAdapter:
         lengths = (
             self._integrated_speed(i, t0, t1)
             for i, (t0, t1) in enumerate(zip(curve.grid, curve.grid[1:])))
-        self.grid = list(_accumulate(lengths, initial=0))
+
+        # NB: "initial" argument to itertools.accumulate since Python 3.8
+        #self.grid = list(_accumulate(lengths, initial=0))
+        self.grid = [0] + list(_accumulate(lengths))
 
     def _integrated_speed(self, idx, t0, t1):
         """Integral over the speed on a curve segment.
