@@ -268,32 +268,54 @@ class PiecewiseSlerp:
             (t - t0) / (t1 - t0))
 
 
-class BezierSpline:
+class DeCasteljau:
+    """De Casteljau's algorithm, see __init__()."""
 
     def __init__(self, segments, grid=None):
+        """De Casteljau's algorithm using `slerp()`.
+
+        See `the corresponding notebook`__ for details.
+
+        __ ../rotation/de-casteljau.ipynb
+
+        :param segments: Sequence of segments,
+            each one consisting of multiple control quaternions.
+            Different segments can have different numbers of control points.
+        :param grid: Sequence of parameter values corresponding to
+            segment boundaries.  Must be strictly increasing.
+        :type grid: optional
+
+        """
         if len(segments) < 1:
             raise ValueError('There must be at least one segment')
-        self.segments = segments
         if grid is None:
             # uniform parameterization
             grid = range(len(segments) + 1)
+        self.segments = segments
         self.grid = list(grid)
 
-    def evaluate(self, t):
-        if not _np.isscalar(t):
-            return _np.array([self.evaluate(t) for t in t])
-        t, segment = self._select_segment_and_normalize_t(t)
-        return slerp(*_reduce(segment, t), t)
+    def evaluate(self, t, n=0):
+        """Get value or angular velocity at given parameter value(s).
 
-    def evaluate_velocity(self, t):
+        :param t: Parameter value(s).
+        :param n: Use ``0`` for calculating the value (a quaternion),
+            ``1`` for the angular velocity (a 3-element vector).
+        :type n: {0, 1}, optional
+
+        """
         if not _np.isscalar(t):
-            return _np.array([self.evaluate_velocity(t) for t in t])
+            return _np.array([self.evaluate(t, n) for t in t])
         t, segment = self._select_segment_and_normalize_t(t)
-        one, two = _reduce(segment, t)
-        x, y, z = (two * one.inverse()).log_map()
-        degree = len(segment) - 1
-        # NB: twice the angle
-        return x * 2 * degree, y * 2 * degree, z * 2 * degree
+        if n == 0:
+            return slerp(*_reduce(segment, t), t)
+        elif n == 1:
+            one, two = _reduce(segment, t)
+            x, y, z = (two * one.inverse()).log_map()
+            degree = len(segment) - 1
+            # NB: twice the angle
+            return x * 2 * degree, y * 2 * degree, z * 2 * degree
+        else:
+            raise ValueError('Unsupported n: {!r}'.format(n))
 
     def _select_segment_and_normalize_t(self, t):
         idx = _check_param('t', t, self.grid)

@@ -43,8 +43,8 @@ class PiecewiseCurve:
             Each segment contains coefficients for the monomial basis
             (in order of decreasing degree).
             Different segments can have different polynomial degree.
-        :param grid: Sequence of parameter values.
-            Must be strictly increasing.
+        :param grid: Sequence of parameter values corresponding to
+            segment boundaries.  Must be strictly increasing.
 
         """
         self.segments = [_np.array(coefficients, copy=True)
@@ -54,7 +54,7 @@ class PiecewiseCurve:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
-        """Get value (or *n*-th derivative) at given time(s)."""
+        """Get value (or *n*-th derivative) at given parameter value(s)."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(time, n) for time in t])
 
@@ -77,7 +77,8 @@ class PiecewiseBezierCurve:
 
         :param segments: Sequence of segments,
             each one consisting of multiple control points.
-            Different segments can have different numbers of control points.
+            Different segments can have different numbers of control points
+            (and therefore different polynomial degrees).
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
 
