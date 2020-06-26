@@ -101,7 +101,7 @@ class PiecewiseBezierCurve:
         degree = len(control_points) - 1
         return sum(
             a * b
-            for a, b in zip(control_points, _bernstein_bases(degree, t)))
+            for a, b in zip(control_points, bernstein_bases(degree, t)))
 
 
 def _check_param(name, param, grid):
@@ -116,7 +116,21 @@ def _check_param(name, param, grid):
     return idx
 
 
-def _bernstein_bases(degree, t):
+def bernstein_bases(degree, t):
+    r"""Bernstein bases of given *degree*, evaluated at *t*.
+
+    Returns a list of values corresponding to 
+    :math:`i = 0, \ldots, n`, given the degree :math:`n`,
+    using the formula
+
+    .. math::
+
+        b_{i,n}(t) = {n \choose i} t^i \left( 1 - t \right)^{n - i},
+
+    with the *binomial coefficient*
+    :math:`{n \choose i} = \frac{n!}{i!(n - i)!}`.
+
+    """
     return [
         _comb(degree, i) * t**i * (1 - t)**(degree - i)
         for i in range(degree + 1)]
