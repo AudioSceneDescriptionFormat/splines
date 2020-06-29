@@ -38,13 +38,34 @@ class Quaternion:
             return NotImplemented
         return self.xyzw == other.xyzw
 
-    def __mul__(self, other):
+    def __add__(self, other):
         if not isinstance(other, Quaternion):
             return NotImplemented
+        s_x, s_y, s_z = self.vector
+        o_x, o_y, o_z = other.vector
+        return Quaternion(
+            scalar=self.scalar + other.scalar,
+            vector=(s_x + o_x, s_y + o_y, s_z + o_z))
+
+    def __sub__(self, other):
+        if not isinstance(other, Quaternion):
+            return NotImplemented
+        s_x, s_y, s_z = self.vector
+        o_x, o_y, o_z = other.vector
+        return Quaternion(
+            scalar=self.scalar - other.scalar,
+            vector=(s_x - o_x, s_y - o_y, s_z - o_z))
+
+    def __mul__(self, other):
         if isinstance(self, UnitQuaternion) and isinstance(other, UnitQuaternion):
             result_type = UnitQuaternion
-        else:
+        elif isinstance(other, Quaternion):
             result_type = Quaternion
+        else:
+            x, y, z = self.vector
+            return Quaternion(
+                scalar=self.scalar * other,
+                vector=(x * other, y * other, z * other))
         a1 = self.scalar
         b1, c1, d1 = self.vector
         a2 = other.scalar
@@ -59,6 +80,11 @@ class Quaternion:
                 a1*d2 + b1*c2 - c1*b2 + d1*a2,
             )
         )
+
+    def __rmul__(self, other):
+        if not isinstance(other, Quaternion):
+            return self.__mul__(other)
+        assert False
 
     def __neg__(self):
         x, y, z = self.vector
