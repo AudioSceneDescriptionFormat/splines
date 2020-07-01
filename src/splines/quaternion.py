@@ -2,7 +2,7 @@
 import math as _math
 
 import numpy as _np
-from . import _check_param
+from . import _check_param, _check_endconditions
 
 
 class Quaternion:
@@ -266,12 +266,7 @@ class PiecewiseSlerp:
         :type closed: optional
 
         """
-        rotations = list(rotations)
-        if len(rotations) < 2:
-            raise ValueError('At least two rotations are required')
-        if closed:
-            rotations += rotations[:1]
-        rotations = list(canonicalized(rotations))
+        rotations = _check_rotations(rotations, closed=closed)
         if grid is None:
             grid = range(len(rotations))
         if len(rotations) != len(grid):
@@ -295,10 +290,10 @@ class PiecewiseSlerp:
 
 
 class DeCasteljau:
-    """De Casteljau's algorithm, see __init__()."""
+    """Spline using De Casteljau's algorithm, see __init__()."""
 
     def __init__(self, segments, grid=None):
-        """De Casteljau's algorithm using `slerp()`.
+        """Spline using De Casteljau's algorithm with `slerp()`.
 
         See `the corresponding notebook`__ for details.
 
@@ -333,9 +328,9 @@ class DeCasteljau:
             return _np.array([self.evaluate(t, n) for t in t])
         t, segment = self._select_segment_and_normalize_t(t)
         if n == 0:
-            return slerp(*_reduce(segment, t), t)
+            return slerp(*_reduce_de_casteljau(segment, t), t)
         elif n == 1:
-            one, two = _reduce(segment, t)
+            one, two = _reduce_de_casteljau(segment, t)
             x, y, z = (two * one.inverse()).log_map()
             degree = len(segment) - 1
             # NB: twice the angle
@@ -350,8 +345,8 @@ class DeCasteljau:
         return t, self.segments[idx]
 
 
-def _reduce(segment, t):
-    """Obtain two quaternions for the last step of the algorithm.
+def _reduce_de_casteljau(segment, t):
+    """Obtain two quaternions for the last step of De Castelau's algorithm.
 
     Recursively applies `slerp()` to neighboring control quaternions
     until only two are left.
@@ -361,7 +356,149 @@ def _reduce(segment, t):
         raise ValueError('Segment must have at least two quaternions')
     if len(segment) == 2:
         return segment
-    return _reduce([
+    return _reduce_de_casteljau([
         slerp(one, two, t)
         for one, two in zip(segment, segment[1:])
     ], t)
+
+
+class KochanekBartels(DeCasteljau):
+    """Kochanek--Bartels-like rotation spline, see __init__()."""
+
+    @staticmethod
+    def _calculate_control_quaternions(quaternions, times, tcb):
+        q_1, q0, q1 = quaternions
+        t_1, t0, t1 = times
+        T, C, B = tcb
+        a = (1 - T) * (1 + C) * (1 + B)
+        b = (1 - T) * (1 - C) * (1 - B)
+        c = (1 - T) * (1 - C) * (1 + B)
+        d = (1 - T) * (1 + C) * (1 - B)
+        incoming = (
+            (q1 * q0.inverse())**(
+                (d * (t0 - t_1)**2) /
+                ((t1 - t0) * (t0 - t_1) * (t1 - t_1))) *
+            (q0 * q_1.inverse())**(
+                (c * (t1 - t0)**2) /
+                ((t1 - t0) * (t0 - t_1) * (t1 - t_1)))
+        )**(1 / 3)
+        outgoing = (
+            (q1 * q0.inverse())**(
+                (b * (t0 - t_1)**2) /
+                ((t1 - t0) * (t0 - t_1) * (t1 - t_1))) *
+            (q0 * q_1.inverse())**(
+                (a * (t1 - t0)**2) /
+                ((t1 - t0) * (t0 - t_1) * (t1 - t_1)))
+        )**(1 / 3)
+        return incoming.inverse() * q0, q0, q0, outgoing * q0
+
+    def __init__(self, rotations, grid=None, *, tcb=(0, 0, 0), alpha=None,
+                 endconditions='natural'):
+        """Kochanek--Bartels-like rotation spline.
+
+        :param rotations: Sequence of rotations.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+        :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
+            TCB values can only be given for the interior rotations.
+        :param alpha: TODO
+        :param endconditions: Start/end conditions. Can be ``'closed'``,
+            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+
+            TODO: clamped
+
+            If ``'closed'``, the first vertex is re-used as last vertex
+            and an additional *grid* time has to be specified.
+
+        """
+        closed = endconditions == 'closed'
+        if closed:
+            interior = len(rotations)
+        else:
+            interior = len(rotations) - 2
+        rotations = _check_rotations(rotations, closed=closed)
+        grid = _check_grid(grid, alpha, rotations)
+        tcb = _np.asarray(tcb)
+        if tcb.ndim == 1 and len(tcb) == 3:
+            tcb = _np.tile(tcb, (interior, 1))
+        if len(tcb) != interior:
+            raise ValueError(
+                'There must be two more rotations than TCB values '
+                '(except for closed curves)')
+        start, end, zip_rotations, zip_grid = _check_endconditions(
+            endconditions, rotations, grid)
+        if closed:
+            # Move first TCB value to the end:
+            tcb = _np.roll(tcb, -1, axis=0)
+
+        # TODO: what happens when exactly 2 rotations are given?
+
+        control_points = []
+        for qs, times, tcb in zip(zip_rotations, zip_grid, tcb):
+            control_points.extend(
+                self._calculate_control_quaternions(qs, times, tcb))
+        if closed:
+            control_points = control_points[-2:] + control_points[:-2]
+        else:
+            control_points.insert(0, _end_control_quaternion(
+                start,
+                [rotations[0], control_points[0], control_points[1]]))
+            control_points.insert(0, rotations[0])
+            control_points.append(_end_control_quaternion(
+                end,
+                [rotations[-1], control_points[-1], control_points[-2]]))
+            control_points.append(rotations[-1])
+        segments = list(zip(*[iter(control_points)] * 4))
+        DeCasteljau.__init__(self, segments, grid)
+
+
+def _check_rotations(rotations, *, closed):
+    """Canonicalize and if closed, append first rotation at the end."""
+    rotations = list(rotations)
+    if len(rotations) < 2:
+        raise ValueError('At least two rotations are required')
+    if closed:
+        rotations = rotations + rotations[:1]
+    return list(canonicalized(rotations))
+
+
+def _check_grid(grid, alpha, rotations):
+    if grid is None:
+        if alpha is None:
+            # NB: This is the same as alpha=0, except the type is int
+            return range(len(rotations))
+        grid = [0]
+        raise NotImplementedError('TODO')
+        #for x0, x1 in zip(rotations, rotations[1:]):
+        #    delta = _np.linalg.norm(x1 - x0)**alpha
+        #    if delta == 0:
+        #        raise ValueError(
+        #            'Repeated rotations are not possible with alpha != 0')
+        #    grid.append(grid[-1] + delta)
+    else:
+        if alpha is not None:
+            raise TypeError('Only one of {grid, alpha} is allowed')
+        if len(rotations) != len(grid):
+            raise ValueError('Number of grid values must be same as '
+                             'rotations (one more for closed curves)')
+        # TODO: check if grid values are increasing?
+    return grid
+
+
+def _end_control_quaternion(condition, rotations):
+    if condition == 'natural':
+        return _natural_control_quaternion(rotations)
+    elif _np.shape(condition) == _np.shape(rotations[0]):
+        #tangent = condition
+        raise NotImplementedError('TODO')
+    raise ValueError(
+        f'{condition!r} is not a valid start/end condition')
+
+
+def _natural_control_quaternion(rotations):
+    """Return second control quaternion given the other three."""
+    outer, inner_control, inner = rotations
+    return (
+        ((inner * inner_control.inverse())).inverse() *
+        (inner * outer.inverse())
+    )**(1 / 2) * outer
