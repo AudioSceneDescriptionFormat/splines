@@ -371,23 +371,22 @@ class KochanekBartels(DeCasteljau):
         b = (1 - T) * (1 - C) * (1 - B)
         c = (1 - T) * (1 - C) * (1 + B)
         d = (1 - T) * (1 + C) * (1 - B)
-        incoming = (
-            (q1 * q0.inverse())**(
-                (d * (t0 - t_1)**2) /
-                ((t1 - t0) * (t0 - t_1) * (t1 - t_1))) *
-            (q0 * q_1.inverse())**(
-                (c * (t1 - t0)**2) /
-                ((t1 - t0) * (t0 - t_1) * (t1 - t_1)))
-        )**(1 / 3)
-        outgoing = (
-            (q1 * q0.inverse())**(
-                (b * (t0 - t_1)**2) /
-                ((t1 - t0) * (t0 - t_1) * (t1 - t_1))) *
-            (q0 * q_1.inverse())**(
-                (a * (t1 - t0)**2) /
-                ((t1 - t0) * (t0 - t_1) * (t1 - t_1)))
-        )**(1 / 3)
-        return incoming.inverse() * q0, q0, q0, outgoing * q0
+
+        q_in = q0 * q_1.inverse()
+        q_out = q1 * q0.inverse()
+        v_in = q_in.log_map() / (t0 - t_1)
+        v_out = q_out.log_map() / (t1 - t0)
+
+        def v0(weight_in, weight_out):
+            return (
+                weight_in * (t1 - t0) * v_in +
+                weight_out * (t0 - t_1) * v_out
+            ) / (t1 - t_1)    
+
+        return [
+            UnitQuaternion.exp_map(-v0(c, d) * (t0 - t_1) / 3) * q0,
+            UnitQuaternion.exp_map(v0(a, b) * (t1 - t0) / 3) * q0,
+        ]
 
     def __init__(self, rotations, grid=None, *, tcb=(0, 0, 0), alpha=None,
                  endconditions='natural'):
@@ -432,8 +431,9 @@ class KochanekBartels(DeCasteljau):
 
         control_points = []
         for qs, times, tcb in zip(zip_rotations, zip_grid, tcb):
-            control_points.extend(
-                self._calculate_control_quaternions(qs, times, tcb))
+            q_before, q_after = self._calculate_control_quaternions(
+                qs, times, tcb)
+            control_points.extend([q_before, qs[1], qs[1], q_after])
         if closed:
             control_points = control_points[-2:] + control_points[:-2]
         else:
@@ -447,6 +447,21 @@ class KochanekBartels(DeCasteljau):
             control_points.append(rotations[-1])
         segments = list(zip(*[iter(control_points)] * 4))
         DeCasteljau.__init__(self, segments, grid)
+
+
+class CatmullRom(KochanekBartels):
+    """Catmull--Rom-like rotation spline, see __init__()."""
+
+    def __init__(self, rotations, grid=None, *, alpha=None,
+                 endconditions='natural'):
+        """Catmull--Rom-like rotation spline.
+
+        This is just `KochanekBartels` without TCB values.
+
+        """
+        super().__init__(
+            rotations, grid, tcb=(0, 0, 0),
+            alpha=alpha, endconditions=endconditions)
 
 
 def _check_rotations(rotations, *, closed):
@@ -465,13 +480,12 @@ def _check_grid(grid, alpha, rotations):
             # NB: This is the same as alpha=0, except the type is int
             return range(len(rotations))
         grid = [0]
-        raise NotImplementedError('TODO')
-        #for x0, x1 in zip(rotations, rotations[1:]):
-        #    delta = _np.linalg.norm(x1 - x0)**alpha
-        #    if delta == 0:
-        #        raise ValueError(
-        #            'Repeated rotations are not possible with alpha != 0')
-        #    grid.append(grid[-1] + delta)
+        for a, b in zip(rotations, rotations[1:]):
+            delta = _math.acos(a.dot(b))**alpha
+            if delta == 0:
+                raise ValueError(
+                    'Repeated rotations are not possible with alpha != 0')
+            grid.append(grid[-1] + delta)
     else:
         if alpha is not None:
             raise TypeError('Only one of {grid, alpha} is allowed')
