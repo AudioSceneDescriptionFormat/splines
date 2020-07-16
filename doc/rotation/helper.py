@@ -117,16 +117,12 @@ def prepare_axes(ax):
     return create_empty_collection(ax)
 
 
-def plot_rotation(rot, ax=None, ls=None):
-    if ax is None:
-        ax = plt.gca(projection='dumb3d')
-    coll = prepare_axes(ax)
-    if ls is None:
-        ls = LightSource()
-    polys, facecolors = create_polys(rot, ls=ls)
-    coll.set_verts(polys)
-    coll.set_facecolors(facecolors)
-    return coll
+def plot_rotation(rot, figsize=None, ls=None):
+    if not isinstance(rot, dict):
+        rot = {'': rot}
+    collections = prepare_figure(rot.keys(), figsize=figsize)
+    collections = update_collections(collections, rot.values(), ls=ls)
+    return collections
 
 
 def prepare_figure(titles='', **kwargs):
@@ -137,7 +133,6 @@ def prepare_figure(titles='', **kwargs):
         squeeze=False,
         subplot_kw=dict(projection='dumb3d'),
         **kwargs)
-    plt.close(fig)
     collections = []
     for ax, title in zip(axs, titles):
         collections.append(prepare_axes(ax))
@@ -186,16 +181,20 @@ def plot_rotations(rotations, *, figsize=None, ls=None):
             polys += offset
             coll.set_verts(polys)
             coll.set_facecolors(facecolors)
-    plt.show()
+    plt.show(fig)
 
 
-def animate_rotations(rotations, *, figsize=None, interval=40, **kwargs):
+def animate_rotations(rotations, *, figsize=None, ls=None, interval=40,
+                      **kwargs):
     if not isinstance(rotations, dict):
         rotations = {'': rotations}
+    if ls is None:
+        ls = LightSource()
     collections = prepare_figure(rotations.keys(), figsize=figsize)
+    plt.close(collections[0].axes.figure)
 
     def ani_func(rot):
-        return update_collections(collections, rot)
+        return update_collections(collections, rot, ls=ls)
 
     return FuncAnimation(
         collections[0].axes.figure,
