@@ -707,8 +707,8 @@ class NewGridAdapter:
             self.grid.append(new)
         self.curve = curve
 
-    def evaluate(self, u, n=0):
+    def evaluate(self, u):
         if not _np.isscalar(u):
-            return _np.array([self.evaluate(u, n) for u in u])
+            return _np.array([self.evaluate(u) for u in u])
         idx = _check_param('u', u, self.grid)
         return self.curve.evaluate(self._new2old.evaluate(u))
