@@ -201,23 +201,20 @@ class UnitQuaternion(Quaternion):
 
         :returns: Corresponding vector in the tangent space at the
             quaternion identity.
-        :rtype: 3-tuple
 
         """
         length = self.angle / 2
         if self.scalar == 1:
             zero = 0 * self.scalar  # to get appropriate numeric type
             return zero, zero, zero
-        x, y, z = self.axis
-        return x * length, y * length, z * length
+        return self.axis * length
 
     @property
     def axis(self):
         assert self.scalar <= 1
         # NB: This is the same as sqrt(x**2 + y**2 + z**2)
         norm = _math.sqrt(1 - self.scalar**2)
-        x, y, z = self.vector
-        return x / norm, y / norm, z / norm
+        return _np.true_divide(self.vector, norm)
 
     @property
     def angle(self):
