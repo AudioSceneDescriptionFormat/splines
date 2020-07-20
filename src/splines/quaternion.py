@@ -166,9 +166,9 @@ class UnitQuaternion(Quaternion):
     def __pow__(self, alpha):
         if not _np.isscalar(alpha):
             return _np.array([self.__pow__(a) for a in alpha])
-        if self.scalar == 1:
+        if self.scalar >= 1:
             return super().__new__(UnitQuaternion, self.scalar, self.vector)
-        return UnitQuaternion.from_axis_angle(self.axis, alpha * self.angle)
+        return UnitQuaternion.exp_map(alpha * self.log_map())
 
     inverse = Quaternion.conjugate
     """Multiplicative inverse.
@@ -204,7 +204,7 @@ class UnitQuaternion(Quaternion):
 
         """
         length = self.angle / 2
-        if self.scalar == 1:
+        if self.scalar >= 1:
             zero = 0 * self.scalar  # to get appropriate numeric type
             return zero, zero, zero
         return self.axis * length
