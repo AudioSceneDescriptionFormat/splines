@@ -136,8 +136,8 @@ class UnitQuaternion(Quaternion):
 
     __slots__ = ()
 
-    def __new__(cls, *args, **kwargs):
-        raise TypeError('Use UnitQuaternion.from_*() to create a UnitQuaternion')
+    def __new__(cls):
+        return super().__new__(cls, 1.0, (0.0, 0.0, 0.0))
 
     @classmethod
     def from_axis_angle(cls, axis, angle):
