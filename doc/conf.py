@@ -125,6 +125,7 @@ html_theme_options = {
 }
 html_domain_indices = False
 html_show_sourcelink = True
+html_favicon = 'favicon.svg'
 
 mathjax_config = {
     'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
