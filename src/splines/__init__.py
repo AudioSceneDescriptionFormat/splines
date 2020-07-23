@@ -665,10 +665,10 @@ class ConstantSpeedAdapter:
         from scipy.optimize import bisect
         return bisect(length, t0, t1)
 
-    def evaluate(self, s, n=0):
+    def evaluate(self, s):
         if not _np.isscalar(s):
-            return _np.array([self.evaluate(s, n) for s in s])
-        return self.curve.evaluate(self._s2t(s), n)
+            return _np.array([self.evaluate(s) for s in s])
+        return self.curve.evaluate(self._s2t(s))
 
 
 class NewGridAdapter:
