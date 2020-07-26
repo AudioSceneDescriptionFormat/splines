@@ -322,23 +322,24 @@ class DeCasteljau:
         """
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t, n) for t in t])
-        t, segment = self._select_segment_and_normalize_t(t)
+        segment, t, delta_t = self._select_segment_and_normalize_t(t)
         if n == 0:
             return slerp(*_reduce_de_casteljau(segment, t), t)
         elif n == 1:
             one, two = _reduce_de_casteljau(segment, t)
-            x, y, z = (two * one.inverse()).log_map()
+            tangent = (two * one.inverse()).log_map()
             degree = len(segment) - 1
             # NB: twice the angle
-            return x * 2 * degree, y * 2 * degree, z * 2 * degree
+            return tangent * 2 * degree / delta_t
         else:
             raise ValueError('Unsupported n: {!r}'.format(n))
 
     def _select_segment_and_normalize_t(self, t):
         idx = _check_param('t', t, self.grid)
         t0, t1 = self.grid[idx:idx + 2]
-        t = (t - t0) / (t1 - t0)
-        return t, self.segments[idx]
+        delta_t = t1 - t0
+        t = (t - t0) / delta_t
+        return self.segments[idx], t, delta_t
 
 
 def _reduce_de_casteljau(segment, t):
