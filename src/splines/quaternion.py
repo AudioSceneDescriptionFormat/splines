@@ -526,7 +526,6 @@ class BarryGoldman:
         """
         # TODO: what happens when exactly 2 rotations are given?
         self.rotations = _check_rotations(rotations, closed=True)
-        assert self.rotations[0] is self.rotations[-1]
         self.grid = list(_check_grid(grid, alpha, self.rotations))
 
     def evaluate(self, t):
@@ -536,15 +535,17 @@ class BarryGoldman:
         q0, q1 = self.rotations[idx:idx + 2]
         t0, t1 = self.grid[idx:idx + 2]
         if idx == 0:
-            assert q0 is self.rotations[-1]
             q_1 = self.rotations[-2]
+            if q_1.dot(q0) < 0:
+                q_1 = -q_1
             t_1 = t0 - (self.grid[-1] - self.grid[-2])
         else:
             q_1 = self.rotations[idx - 1]
             t_1 = self.grid[idx - 1]
         if idx + 2 == len(self.rotations):
-            assert q1 is self.rotations[0]
             q2 = self.rotations[1]
+            if q1.dot(q2) < 0:
+                q2 = -q2
             assert len(self.rotations) == len(self.grid)
             t2 = t1 + (self.grid[1] - self.grid[0])
         else:
