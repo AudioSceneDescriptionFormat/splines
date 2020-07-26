@@ -203,10 +203,9 @@ class UnitQuaternion(Quaternion):
             quaternion identity.
 
         """
-        length = self.angle / 2
         if self.scalar >= 1:
-            zero = 0 * self.scalar  # to get appropriate numeric type
-            return zero, zero, zero
+            return _np.zeros_like(self.vector)
+        length = self.angle / 2
         return self.axis * length
 
     @property
@@ -381,7 +380,7 @@ class KochanekBartels(DeCasteljau):
             return (
                 weight_in * (t1 - t0) * v_in +
                 weight_out * (t0 - t_1) * v_out
-            ) / (t1 - t_1)    
+            ) / (t1 - t_1)
 
         return [
             UnitQuaternion.exp_map(-v0(c, d) * (t0 - t_1) / 3) * q0,
