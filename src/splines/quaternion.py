@@ -2,7 +2,7 @@
 import math as _math
 
 import numpy as _np
-from . import _check_param, _check_endconditions
+from . import _check_param
 
 
 class Quaternion:
@@ -403,7 +403,7 @@ class KochanekBartels(DeCasteljau):
 
             TODO: clamped
 
-            If ``'closed'``, the first vertex is re-used as last vertex
+            If ``'closed'``, the first rotation is re-used as last rotation
             and an additional *grid* time has to be specified.
 
         """
@@ -494,6 +494,26 @@ def _check_grid(grid, alpha, rotations):
                              'rotations (one more for closed curves)')
         # TODO: check if grid values are increasing?
     return grid
+
+
+def _check_endconditions(endconditions, quaternions, grid):
+    if endconditions == 'closed':
+        second_quaternion = quaternions[1]
+        if quaternions[-1].dot(second_quaternion) < 0:
+            second_quaternion = -second_quaternion
+        quaternions += [second_quaternion]
+        first_interval = grid[1] - grid[0]
+        grid = list(grid) + [grid[-1] + first_interval]
+        start = end = None
+    elif isinstance(endconditions, str):
+        start = end = endconditions
+    else:
+        try:
+            start, end = endconditions
+        except (TypeError, ValueError):
+            raise TypeError('endconditions must be a string or a pair')
+    triples = [zip(arg, arg[1:], arg[2:]) for arg in (quaternions, grid)]
+    return (start, end, *triples)
 
 
 def _end_control_quaternion(condition, rotations):
