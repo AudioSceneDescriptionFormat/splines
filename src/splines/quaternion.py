@@ -248,13 +248,13 @@ def canonicalized(quaternions):
 class PiecewiseSlerp:
     """Piecewise Slerp, see __init__()."""
 
-    def __init__(self, rotations, *, grid=None, closed=False):
+    def __init__(self, quaternions, *, grid=None, closed=False):
         """Piecewise Slerp.
 
-        :param rotations: Sequence of quaternions to be interpolated.
+        :param quaternions: Sequence of quaternions to be interpolated.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
-            Must have the same length as *rotations*, except when *closed*
+            Must have the same length as *quaternions*, except when *closed*
             is ``True``, where it must be one element longer.
         :type grid: optional
         :param closed: If ``True``, the first quaternion is repeated at
@@ -262,14 +262,14 @@ class PiecewiseSlerp:
         :type closed: optional
 
         """
-        rotations = _check_rotations(rotations, closed=closed)
+        quaternions = _check_quaternions(quaternions, closed=closed)
         if grid is None:
-            grid = range(len(rotations))
-        if len(rotations) != len(grid):
+            grid = range(len(quaternions))
+        if len(quaternions) != len(grid):
             raise ValueError(
                 'Number of grid values must be same as '
-                'rotations (one more for closed curves)')
-        self.rotations = rotations
+                'quaternions (one more for closed curves)')
+        self.quaternions = quaternions
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
@@ -280,8 +280,8 @@ class PiecewiseSlerp:
         idx = _check_param('t', t, self.grid)
         t0, t1 = self.grid[idx:idx + 2]
         return slerp(
-            self.rotations[idx],
-            self.rotations[idx + 1],
+            self.quaternions[idx],
+            self.quaternions[idx + 1],
             (t - t0) / (t1 - t0))
 
 
@@ -308,6 +308,11 @@ class DeCasteljau:
         if grid is None:
             # uniform parameterization
             grid = range(len(segments) + 1)
+        else:
+            if len(segments) + 1 != len(grid):
+                raise ValueError(
+                    'Number of grid values must be one more '
+                    'than number of segments')
         self.segments = segments
         self.grid = list(grid)
 
@@ -388,15 +393,15 @@ class KochanekBartels(DeCasteljau):
             UnitQuaternion.exp_map(v0(a, b) * (t1 - t0) / 3) * q0,
         ]
 
-    def __init__(self, rotations, grid=None, *, tcb=(0, 0, 0), alpha=None,
+    def __init__(self, quaternions, grid=None, *, tcb=(0, 0, 0), alpha=None,
                  endconditions='natural'):
         """Kochanek--Bartels-like rotation spline.
 
-        :param rotations: Sequence of rotations.
+        :param quaternions: Sequence of quaternions.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
-            TCB values can only be given for the interior rotations.
+            TCB values can only be given for the interior quaternions.
         :param alpha: TODO
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
@@ -409,42 +414,42 @@ class KochanekBartels(DeCasteljau):
         """
         closed = endconditions == 'closed'
         if closed:
-            interior = len(rotations)
+            interior = len(quaternions)
         else:
-            interior = len(rotations) - 2
-        rotations = _check_rotations(rotations, closed=closed)
-        grid = _check_grid(grid, alpha, rotations)
+            interior = len(quaternions) - 2
+        quaternions = _check_quaternions(quaternions, closed=closed)
+        grid = _check_grid(grid, alpha, quaternions)
         tcb = _np.asarray(tcb)
         if tcb.ndim == 1 and len(tcb) == 3:
             tcb = _np.tile(tcb, (interior, 1))
         if len(tcb) != interior:
             raise ValueError(
-                'There must be two more rotations than TCB values '
+                'There must be two more quaternions than TCB values '
                 '(except for closed curves)')
-        start, end, zip_rotations, zip_grid = _check_endconditions(
-            endconditions, rotations, grid)
+        start, end, zip_quaternions, zip_grid = _check_endconditions(
+            endconditions, quaternions, grid)
         if closed:
-            # Move first TCB value to the end:
-            tcb = _np.roll(tcb, -1, axis=0)
+            tcb = _np.row_stack([tcb, tcb[0]])
 
-        # TODO: what happens when exactly 2 rotations are given?
+        # TODO: what happens when exactly 2 quaternions are given?
 
         control_points = []
-        for qs, times, tcb in zip(zip_rotations, zip_grid, tcb):
+        for qs, ts, tcb in zip(zip_quaternions, zip_grid, tcb):
             q_before, q_after = self._calculate_control_quaternions(
-                qs, times, tcb)
+                qs, ts, tcb)
             control_points.extend([q_before, qs[1], qs[1], q_after])
         if closed:
-            control_points = control_points[-2:] + control_points[:-2]
+            assert len(grid) * 4 == len(control_points)
+            control_points = control_points[2:-2]
         else:
             control_points.insert(0, _end_control_quaternion(
                 start,
-                [rotations[0], control_points[0], control_points[1]]))
-            control_points.insert(0, rotations[0])
+                [quaternions[0], control_points[0], control_points[1]]))
+            control_points.insert(0, quaternions[0])
             control_points.append(_end_control_quaternion(
                 end,
-                [rotations[-1], control_points[-1], control_points[-2]]))
-            control_points.append(rotations[-1])
+                [quaternions[-1], control_points[-1], control_points[-2]]))
+            control_points.append(quaternions[-1])
         segments = list(zip(*[iter(control_points)] * 4))
         DeCasteljau.__init__(self, segments, grid)
 
@@ -452,7 +457,7 @@ class KochanekBartels(DeCasteljau):
 class CatmullRom(KochanekBartels):
     """Catmull--Rom-like rotation spline, see __init__()."""
 
-    def __init__(self, rotations, grid=None, *, alpha=None,
+    def __init__(self, quaternions, grid=None, *, alpha=None,
                  endconditions='natural'):
         """Catmull--Rom-like rotation spline.
 
@@ -460,50 +465,58 @@ class CatmullRom(KochanekBartels):
 
         """
         super().__init__(
-            rotations, grid, tcb=(0, 0, 0),
+            quaternions, grid, tcb=(0, 0, 0),
             alpha=alpha, endconditions=endconditions)
 
 
-def _check_rotations(rotations, *, closed):
+def _check_quaternions(quaternions, *, closed):
     """Canonicalize and if closed, append first rotation at the end."""
-    rotations = list(rotations)
-    if len(rotations) < 2:
-        raise ValueError('At least two rotations are required')
+    quaternions = list(quaternions)
+    if len(quaternions) < 2:
+        raise ValueError('At least two quaternions are required')
     if closed:
-        rotations = rotations + rotations[:1]
-    return list(canonicalized(rotations))
+        quaternions = quaternions + quaternions[:1]
+    return list(canonicalized(quaternions))
 
 
-def _check_grid(grid, alpha, rotations):
+def _check_grid(grid, alpha, quaternions):
     if grid is None:
         if alpha is None:
             # NB: This is the same as alpha=0, except the type is int
-            return range(len(rotations))
+            return range(len(quaternions))
         grid = [0]
-        for a, b in zip(rotations, rotations[1:]):
+        for a, b in zip(quaternions, quaternions[1:]):
             delta = _math.acos(a.dot(b))**alpha
             if delta == 0:
                 raise ValueError(
-                    'Repeated rotations are not possible with alpha != 0')
+                    'Repeated quaternions are not possible with alpha != 0')
             grid.append(grid[-1] + delta)
     else:
         if alpha is not None:
             raise TypeError('Only one of {grid, alpha} is allowed')
-        if len(rotations) != len(grid):
+        if len(quaternions) != len(grid):
             raise ValueError('Number of grid values must be same as '
-                             'rotations (one more for closed curves)')
+                             'quaternions (one more for closed curves)')
         # TODO: check if grid values are increasing?
     return grid
 
 
 def _check_endconditions(endconditions, quaternions, grid):
     if endconditions == 'closed':
-        second_quaternion = quaternions[1]
-        if quaternions[-1].dot(second_quaternion) < 0:
-            second_quaternion = -second_quaternion
-        quaternions += [second_quaternion]
-        first_interval = grid[1] - grid[0]
-        grid = list(grid) + [grid[-1] + first_interval]
+        # NB: the first quaternion has already been appended to the end in
+        #     _check_quaternions()
+        prefix = quaternions[-2]
+        if prefix.dot(quaternions[0]) < 0:
+            prefix = -prefix
+        suffix = quaternions[1]
+        if quaternions[-1].dot(suffix) < 0:
+            suffix = -suffix
+        quaternions = [prefix] + quaternions + [suffix]
+        grid = [
+            grid[0] - (grid[-1] - grid[-2]),
+            *grid,
+            grid[-1] + (grid[1] - grid[0]),
+        ]
         start = end = None
     elif isinstance(endconditions, str):
         start = end = endconditions
@@ -512,23 +525,24 @@ def _check_endconditions(endconditions, quaternions, grid):
             start, end = endconditions
         except (TypeError, ValueError):
             raise TypeError('endconditions must be a string or a pair')
+    assert len(quaternions) == len(grid)
     triples = [zip(arg, arg[1:], arg[2:]) for arg in (quaternions, grid)]
     return (start, end, *triples)
 
 
-def _end_control_quaternion(condition, rotations):
+def _end_control_quaternion(condition, quaternions):
     if condition == 'natural':
-        return _natural_control_quaternion(rotations)
-    elif _np.shape(condition) == _np.shape(rotations[0]):
+        return _natural_control_quaternion(quaternions)
+    elif _np.shape(condition) == _np.shape(quaternions[0]):
         #tangent = condition
         raise NotImplementedError('TODO')
     raise ValueError(
         f'{condition!r} is not a valid start/end condition')
 
 
-def _natural_control_quaternion(rotations):
+def _natural_control_quaternion(quaternions):
     """Return second control quaternion given the other three."""
-    outer, inner_control, inner = rotations
+    outer, inner_control, inner = quaternions
     return (
         ((inner * inner_control.inverse())).inverse() *
         (inner * outer.inverse())
@@ -538,38 +552,38 @@ def _natural_control_quaternion(rotations):
 class BarryGoldman:
     """Rotation spline using Barry--Goldman algorithm, see __init__()."""
 
-    def __init__(self, rotations, grid=None, *, alpha=None):
+    def __init__(self, quaternions, grid=None, *, alpha=None):
         """Rotation spline using Barry--Goldman algorithm.
 
         Always closed (for now).
 
         """
-        # TODO: what happens when exactly 2 rotations are given?
-        self.rotations = _check_rotations(rotations, closed=True)
-        self.grid = list(_check_grid(grid, alpha, self.rotations))
+        # TODO: what happens when exactly 2 quaternions are given?
+        self.quaternions = _check_quaternions(quaternions, closed=True)
+        self.grid = list(_check_grid(grid, alpha, self.quaternions))
 
     def evaluate(self, t):
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t) for t in t])
         idx = _check_param('t', t, self.grid)
-        q0, q1 = self.rotations[idx:idx + 2]
+        q0, q1 = self.quaternions[idx:idx + 2]
         t0, t1 = self.grid[idx:idx + 2]
         if idx == 0:
-            q_1 = self.rotations[-2]
+            q_1 = self.quaternions[-2]
             if q_1.dot(q0) < 0:
                 q_1 = -q_1
             t_1 = t0 - (self.grid[-1] - self.grid[-2])
         else:
-            q_1 = self.rotations[idx - 1]
+            q_1 = self.quaternions[idx - 1]
             t_1 = self.grid[idx - 1]
-        if idx + 2 == len(self.rotations):
-            q2 = self.rotations[1]
+        if idx + 2 == len(self.quaternions):
+            q2 = self.quaternions[1]
             if q1.dot(q2) < 0:
                 q2 = -q2
-            assert len(self.rotations) == len(self.grid)
+            assert len(self.quaternions) == len(self.grid)
             t2 = t1 + (self.grid[1] - self.grid[0])
         else:
-            q2 = self.rotations[idx + 2]
+            q2 = self.quaternions[idx + 2]
             t2 = self.grid[idx + 2]
         slerp_0_1 = slerp(q0, q1, (t - t0) / (t1 - t0))
         return slerp(
