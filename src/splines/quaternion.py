@@ -414,22 +414,22 @@ class KochanekBartels(DeCasteljau):
         """
         closed = endconditions == 'closed'
         if closed:
-            interior = len(quaternions)
+            tcb_slots = len(quaternions)
         else:
-            interior = len(quaternions) - 2
+            tcb_slots = len(quaternions) - 2
         quaternions = _check_quaternions(quaternions, closed=closed)
         grid = _check_grid(grid, alpha, quaternions)
         tcb = _np.asarray(tcb)
         if tcb.ndim == 1 and len(tcb) == 3:
-            tcb = _np.tile(tcb, (interior, 1))
-        if len(tcb) != interior:
+            tcb = _np.tile(tcb, (tcb_slots, 1))
+        elif len(tcb) != tcb_slots:
             raise ValueError(
                 'There must be two more quaternions than TCB values '
                 '(except for closed curves)')
-        start, end, zip_quaternions, zip_grid = _check_endconditions(
-            endconditions, quaternions, grid)
         if closed:
             tcb = _np.row_stack([tcb, tcb[0]])
+        start, end, zip_quaternions, zip_grid = _check_endconditions(
+            endconditions, quaternions, grid)
 
         # TODO: what happens when exactly 2 quaternions are given?
 

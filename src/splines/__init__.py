@@ -386,22 +386,22 @@ class KochanekBartels(CubicHermite):
         """
         closed = endconditions == 'closed'
         if closed:
-            interior = len(vertices)
+            tcb_slots = len(vertices)
         else:
-            interior = len(vertices) - 2
+            tcb_slots = len(vertices) - 2
         vertices = _check_vertices(vertices, closed=closed)
         grid = _check_grid(grid, alpha, vertices)
         tcb = _np.asarray(tcb)
         if tcb.ndim == 1 and len(tcb) == 3:
-            tcb = _np.tile(tcb, (interior, 1))
-        if len(tcb) != interior:
+            tcb = _np.tile(tcb, (tcb_slots, 1))
+        elif len(tcb) != tcb_slots:
             raise ValueError('There must be two more vertices than TCB values '
                              '(except for closed curves)')
-        start, end, zip_vertices, zip_grid = _check_endconditions(
-            endconditions, vertices, grid)
         if closed:
             # Move first TCB value to the end:
             tcb = _np.roll(tcb, -1, axis=0)
+        start, end, zip_vertices, zip_grid = _check_endconditions(
+            endconditions, vertices, grid)
         tangents = [
             tangent
             for points, times, tcb in zip(zip_vertices, zip_grid, tcb)
