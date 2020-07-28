@@ -544,7 +544,7 @@ def _natural_control_quaternion(quaternions):
     """Return second control quaternion given the other three."""
     outer, inner_control, inner = quaternions
     return (
-        ((inner * inner_control.inverse())).inverse() *
+        (inner_control * inner.inverse()) *
         (inner * outer.inverse())
     )**(1 / 2) * outer
 
