@@ -486,7 +486,7 @@ def _check_grid(grid, alpha, quaternions):
             return range(len(quaternions))
         grid = [0]
         for a, b in zip(quaternions, quaternions[1:]):
-            delta = _math.acos(a.dot(b))**alpha
+            delta = (2 * _math.acos(a.dot(b)))**alpha
             if delta == 0:
                 raise ValueError(
                     'Repeated quaternions are not possible with alpha != 0')
