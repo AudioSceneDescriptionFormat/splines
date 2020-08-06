@@ -1,4 +1,3 @@
-Sphinx>=2
 insipid-sphinx-theme
 nbsphinx
 ipykernel

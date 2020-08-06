@@ -1,6 +1,5 @@
 project = 'Piecewise Polynomial Curves'
 author = 'Matthias Geier'
-copyright = '2020, ' + author
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -12,8 +11,6 @@ extensions = [
     'sphinxcontrib.bibtex',
     'sphinx_last_updated_by_git',
 ]
-
-html_sourcelink_suffix = ''
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -124,6 +121,8 @@ html_theme = 'insipid'
 html_domain_indices = False
 html_favicon = 'favicon.svg'
 html_copy_source = False
+html_add_permalinks = '\N{SECTION SIGN}'
+html_show_copyright = False
 
 mathjax_config = {
     'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
@@ -170,5 +169,5 @@ latex_additional_files = ['references.bib']
 epub_title = project
 epub_author = author
 epub_publisher = author
-epub_copyright = copyright
+epub_copyright = ''
 epub_exclude_files = ['search.html']
