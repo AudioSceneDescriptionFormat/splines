@@ -36,13 +36,12 @@ nbsphinx_execute_arguments = [
 
 
 def if_docname(text):
-    return """
-{% set docname = env.doc2path(env.docname, base=None) %}
-{% if docname not in [
-    'index.ipynb',
-    'catmull-rom.ipynb',
+    return r"""
+{% if env.docname not in [
+    'index',
+    'catmull-rom',
 ] %}
-{% set docname = 'doc/' + docname %}
+{% set docname = 'doc/' + env.doc2path(env.docname, base=None) %}
 {% set latex_href = ''.join([
     '\href{https://github.com/AudioSceneDescriptionFormat/splines/blob/',
     env.config.release,
@@ -52,25 +51,20 @@ def if_docname(text):
     docname | escape_latex,
     '}}}',
 ]) %}
-""" + text + """
+""" + text + r"""
 {% endif %}
 """
 
 
 nbsphinx_prolog = if_docname(r"""
-.. only:: html
+.. raw:: html
 
-    .. role:: raw-html(raw)
-        :format: html
-
-    .. nbinfo::
-
-        This page was generated from `{{ docname }}`__.
-        Interactive online version:
-        :raw-html:`<a href="https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/{{ env.config.release }}?filepath={{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
-
-    __ https://github.com/AudioSceneDescriptionFormat/splines/blob/
-        {{ env.config.release }}/{{ docname }}
+    <div class="admonition note">
+      This page was generated from
+      <a class="reference external" href="https://github.com/AudioSceneDescriptionFormat/splines/blob/{{ env.config.release|e }}/{{ docname|e }}">{{ docname|e }}</a>.
+      Interactive online version:
+      <span style="white-space: nowrap;"><a href="https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/{{ env.config.release|e }}?filepath={{ docname|e }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>.</span>
+    </div>
 
 .. raw:: latex
 
