@@ -402,6 +402,7 @@ class KochanekBartels(DeCasteljau):
             Must be strictly increasing.
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior quaternions.
+            If only two quaternions are given, TCB values are ignored.
         :param alpha: TODO
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
@@ -431,8 +432,6 @@ class KochanekBartels(DeCasteljau):
         start, end, zip_quaternions, zip_grid = _check_endconditions(
             endconditions, quaternions, grid)
 
-        # TODO: what happens when exactly 2 quaternions are given?
-
         control_points = []
         for qs, ts, tcb in zip(zip_quaternions, zip_grid, tcb):
             q_before, q_after = self._calculate_control_quaternions(
@@ -441,6 +440,15 @@ class KochanekBartels(DeCasteljau):
         if closed:
             assert len(grid) * 4 == len(control_points)
             control_points = control_points[2:-2]
+        elif not control_points:
+            # two quaternions -> spherical linear interpolation
+            assert len(quaternions) == 2
+            assert len(grid) == 2
+            assert not closed
+            assert not tcb
+            q0, q1 = quaternions
+            offset = (q1 * q0.inverse())**(1 / 3)  # "cubic" spline, degree 3
+            control_points = [q0, offset * q0, offset.inverse() * q1, q1]
         else:
             control_points.insert(0, _end_control_quaternion(
                 start,

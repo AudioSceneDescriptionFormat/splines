@@ -119,7 +119,7 @@ def _check_param(name, param, grid):
 def bernstein_bases(degree, t):
     r"""Bernstein bases of given *degree*, evaluated at *t*.
 
-    Returns a list of values corresponding to 
+    Returns a list of values corresponding to
     :math:`i = 0, \ldots, n`, given the degree :math:`n`,
     using the formula
 
