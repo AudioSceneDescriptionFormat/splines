@@ -17,8 +17,6 @@ intersphinx_mapping = {
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
 }
 
-master_doc = 'index'
-
 autosummary_generate = ['python-module']
 autoclass_content = 'init'
 autodoc_member_order = 'bysource'
@@ -151,7 +149,7 @@ latex_show_urls = 'footnote'
 latex_domain_indices = False
 
 latex_documents = [
-    (master_doc, 'PiecewisePolynomialCurves.tex', project, author, 'howto'),
+    ('index', 'PiecewisePolynomialCurves.tex', project, author, 'howto'),
 ]
 
 latex_additional_files = ['references.bib']
