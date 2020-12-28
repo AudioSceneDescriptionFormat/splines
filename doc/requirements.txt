@@ -5,5 +5,5 @@ NumPy
 SymPy
 SciPy
 matplotlib>=2.1
-sphinxcontrib-bibtex
+sphinxcontrib-bibtex<2
 sphinx-last-updated-by-git
