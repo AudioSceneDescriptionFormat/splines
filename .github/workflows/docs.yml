@@ -8,12 +8,13 @@ jobs:
       - name: Install pandoc
         run: |
           sudo apt-get install --no-install-recommends pandoc
-      - name: Check Python version
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Double-check Python version
         run: |
           python3 --version
-      - name: Install setuptools
-        run: |
-          python3 -m pip install setuptools
       - name: Install Python package
         run: |
           python3 -m pip install .
