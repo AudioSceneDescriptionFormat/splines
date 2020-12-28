@@ -22,7 +22,7 @@ jobs:
         python3 -m pip install -r doc/requirements.txt
     - name: Build HTML
       run: |
-        python3 -m sphinx doc/ _build/html/ -d _doctrees/ -W -b html
+        python3 -m sphinx -W --keep-going --color doc/ _build/html/ -d _doctrees/ -b html
     - name: Upload HTML
       uses: actions/upload-artifact@v2
       with:
@@ -30,7 +30,7 @@ jobs:
         path: _build/html/
     - name: Build LaTeX sources
       run: |
-        python3 -m sphinx doc/ _build/latex/ -d _doctrees/ -W -b latex
+        python3 -m sphinx -W --keep-going --color doc/ _build/latex/ -d _doctrees/ -b latex
     - name: Run LaTeX
       uses: dante-ev/latex-action@master
       with:
