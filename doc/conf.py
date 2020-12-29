@@ -1,4 +1,4 @@
-project = 'Piecewise Polynomial Curves'
+project = 'Splines'
 author = 'Matthias Geier'
 
 extensions = [
@@ -149,7 +149,7 @@ latex_show_urls = 'footnote'
 latex_domain_indices = False
 
 latex_documents = [
-    ('index', 'PiecewisePolynomialCurves.tex', project, author, 'howto'),
+    ('index', 'splines.tex', project, author, 'howto'),
 ]
 
 latex_additional_files = ['references.bib']

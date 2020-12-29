@@ -38,9 +38,9 @@ jobs:
         uses: dante-ev/latex-action@master
         with:
           working_directory: _build/latex
-          root_file: PiecewisePolynomialCurves.tex
+          root_file: splines.tex
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
           name: PDF
-          path: _build/latex/PiecewisePolynomialCurves.pdf
+          path: _build/latex/splines.pdf
