@@ -191,6 +191,10 @@ def _check_endconditions(endconditions, vertices, grid):
     return (start, end, *triples)
 
 
+def _check_endconditions_and_zip(endconditions, vertices, grid):
+    pass
+
+
 def _check_tangents(tangents, vertices, grid, start, end, *, closed):
     if closed:
         # Move last (outgoing) tangent to the beginning:
@@ -408,6 +412,81 @@ class KochanekBartels(CubicHermite):
             for tangent in self._calculate_tangents(points, times, tcb)]
         tangents = _check_tangents(
             tangents, vertices, grid, start, end, closed=closed)
+        CubicHermite.__init__(self, vertices, tangents, grid)
+
+
+class Natural(CubicHermite):
+    """Natural spline, see __init__()."""
+
+    def __init__(self, vertices, grid=None, *, alpha=None,
+                 endconditions='natural'):
+        """Natural spline.
+
+        See :ref:`/euclidean/natural-splines.ipynb`.
+
+        :param vertices: Sequence of vertices.
+        :param grid: Sequence of parameter values.
+            Must be strictly increasing.
+        :param alpha: TODO
+        :param endconditions: Start/end conditions. Can be ``'closed'``,
+            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            If ``'closed'``, the first vertex is re-used as last vertex
+            and an additional *grid* time has to be specified.
+
+        """
+        N = len(vertices)
+        A = _np.zeros((N, N))
+        b = _np.zeros_like(vertices)
+        closed = endconditions == 'closed'
+        vertices = _check_vertices(vertices, closed=closed)
+        vertices = _np.asarray(vertices)
+        grid = _check_grid(grid, alpha, vertices)
+        delta = _np.diff(grid)
+
+        for i in range(0, N) if closed else range(1, N - 1):
+            A[i, i - 1] = 1 / delta[i - 1]
+            A[i, i] = (2 / delta[i - 1] + 2 / delta[i])
+            A[i, (i + 1) % N] = 1 / delta[i]
+            b[i] = 3 * (
+                (vertices[i] - vertices[(i - 1) % N]) / delta[i - 1]**2 +
+                (vertices[i + 1] - vertices[i]) / delta[i]**2)
+
+        if closed:
+            # Nothing to do here, the first and last row have already
+            # been populated in the for-loop above.
+            pass
+        else:
+            if isinstance(endconditions, str):
+                start = end = endconditions
+            else:
+                try:
+                    start, end = endconditions
+                except (TypeError, ValueError):
+                    raise TypeError('endconditions must be a string or a pair')
+            if start == 'natural':
+                A[0, 0:2] = 2 * delta[0], delta[1]
+                b[0] = 3 * (vertices[1] - vertices[0])
+            elif _np.shape(start) == _np.shape(vertices[0]):
+                A[0, 0] = 1
+                b[0] = start
+            else:
+                raise ValueError(f'{start!r} is not a valid start condition')
+            if end == 'natural':
+                A[N - 1, N - 2:] = delta[N - 2], 2 * delta[N - 2]
+                b[-1] = 3 * (vertices[N - 1] - vertices[N - 2])
+            elif _np.shape(end) == _np.shape(vertices[0]):
+                A[N - 1, N - 1] = 1
+                b[N - 1] = end
+            else:
+                raise ValueError(f'{end!r} is not a valid end condition')
+
+        tangents = _np.linalg.solve(A, b)
+
+        if closed:
+            tangents = _np.concatenate([tangents, tangents[:1]])
+        # Duplicate inner tangents (incoming and outgoing are the same):
+        tangents = _np.row_stack(
+            [tangents[i:i + 2] for i in range(len(tangents) - 1)])
         CubicHermite.__init__(self, vertices, tangents, grid)
 
 
