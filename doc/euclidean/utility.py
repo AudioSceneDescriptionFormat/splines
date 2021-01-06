@@ -54,6 +54,16 @@ class NamedExpression(sp.Equality):
     def _args(self):
         return self.name, self.expr
 
+    @classmethod
+    def solve(cls, expr, name):
+        result = cls(name)
+        result.expr = sp.solve(expr, result.name)[0]
+        return result
+
+    def with_name(self, name):
+        """Return a copy of the expression, but with a new name."""
+        return self.func(name, self.expr)
+
     def subs_symbols(self, *args, **kwargs):
         substitutions = []
         for arg in args:
@@ -80,12 +90,10 @@ class NamedExpression(sp.Equality):
             sp.UnevaluatedExpr(expr) *
             sp.UnevaluatedExpr(sp.simplify(self.expr / expr)))
 
-    def diff(self, variable):
+    def diff(self, *args, **kwargs):
         return self.func(
-            sp.Symbol(
-                r'\frac{d ' + sp.latex(self.name) +
-                '}{d ' + sp.latex(variable)+ '}'),
-            self.expr.diff(variable))
+            sp.Derivative(self.name, *args, **kwargs),
+            self.expr.diff(*args, **kwargs))
 
     def _call_function(self, func, *args, **kwargs):
         return self.func(
