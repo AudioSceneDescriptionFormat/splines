@@ -1,4 +1,4 @@
-project = 'Splines'
+project = 'Splines in Euclidean Space and Beyond'
 author = 'Matthias Geier'
 
 extensions = [
@@ -107,7 +107,7 @@ except Exception:
 
 # -- Options for HTML output -------------------------------------------------
 
-html_title = project + ', version ' + release
+html_title = 'splines, version ' + release
 html_theme = 'insipid'
 html_domain_indices = False
 html_favicon = 'favicon.svg'
@@ -146,6 +146,7 @@ latex_elements = {
 }
 
 latex_show_urls = 'footnote'
+latex_show_pagerefs = True
 latex_domain_indices = False
 
 latex_documents = [
