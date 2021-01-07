@@ -224,13 +224,6 @@ def _end_tangent(condition, vertices, times, other_tangent):
     return tangent
 
 
-def _cubic_hermite_matrix(delta):
-    return _np.array([[ 2, -2,      delta,  delta ],
-                      [-3,  3, -2 * delta, -delta ],
-                      [ 0,  0,      delta,      0 ],
-                      [ 1,  0,          0,      0.]])
-
-
 def _natural_tangent(vertices, times, tangent):
     """Calculate tangent for "natural" end condition.
 
@@ -249,8 +242,16 @@ def _natural_tangent(vertices, times, tangent):
 class CubicHermite(PiecewiseCurve):
     """Cubic Hermite curve, see __init__()."""
 
+    matrix = _np.array([
+        [2, -2, 1, 1],
+        [-3, 3, -2, -1],
+        [0, 0, 1, 0],
+        [1, 0, 0, 0]])
+
     def __init__(self, vertices, tangents, grid=None):
         """Cubic Hermite curve.
+
+        See :ref:`/euclidean/hermite.ipynb`.
 
         :param vertices: Sequence of vertices.
         :param tangents: Sequence of tangent vectors
@@ -267,8 +268,9 @@ class CubicHermite(PiecewiseCurve):
             grid = range(len(vertices))
         if len(vertices) != len(grid):
             raise ValueError('As many grid times as vertices are needed')
+        tangents = _np.asarray(tangents)
         segments = [
-            _cubic_hermite_matrix(t1 - t0) @ [x0, x1, v0, v1]
+            self.matrix @ [x0, x1, (t1 - t0) * v0, (t1 - t0) * v1]
             for (x0, x1), (v0, v1), (t0, t1) in zip(
                 zip(vertices, vertices[1:]),
                 zip(tangents[::2], tangents[1::2]),
