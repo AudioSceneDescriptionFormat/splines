@@ -17,7 +17,7 @@ import numpy as _np
 __version__ = '0.0.0'
 
 
-class PiecewiseCurve:
+class Monomial:
     """Piecewise polynomial curve, see __init__()."""
 
     def __init__(self, segments, grid):
@@ -69,19 +69,40 @@ class PiecewiseCurve:
         return t**powers * weights @ coefficients
 
 
-class PiecewiseBezierCurve:
+class Bernstein:
     """Piecewise Bézier curve, see __init__()."""
 
+    @staticmethod
+    def basis(degree, t):
+        r"""Bernstein basis polynomials of given *degree*, evaluated at *t*.
+
+        Returns a list of values corresponding to
+        :math:`i = 0, \ldots, n`, given the degree :math:`n`,
+        using the formula
+
+        .. math::
+
+            b_{i,n}(t) = {n \choose i} t^i \left( 1 - t \right)^{n - i},
+
+        with the *binomial coefficient*
+        :math:`{n \choose i} = \frac{n!}{i!(n - i)!}`.
+
+        """
+        return [
+            _comb(degree, i) * t**i * (1 - t)**(degree - i)
+            for i in range(degree + 1)]
+
     def __init__(self, segments, grid=None):
-        """Piecewise Bézier/Bernstein curve.
+        """Piecewise Bézier curve using Bernstein basis.
 
         :param segments: Sequence of segments,
-            each one consisting of multiple control points.
+            each one consisting of multiple Bézier control points.
             Different segments can have different numbers of control points
             (and therefore different polynomial degrees).
         :param grid: Sequence of parameter values corresponding to
             segment boundaries.  Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
 
         """
         self.segments = [_np.array(control_points, copy=True)
@@ -91,6 +112,7 @@ class PiecewiseBezierCurve:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
+        """Get value at the given parameter value(s)."""
         if n != 0:
             raise NotImplementedError('Derivatives are not implemented yet')
         if not _np.isscalar(t):
@@ -102,7 +124,7 @@ class PiecewiseBezierCurve:
         degree = len(control_points) - 1
         return sum(
             a * b
-            for a, b in zip(control_points, bernstein_bases(degree, t)))
+            for a, b in zip(control_points, self.basis(degree, t)))
 
 
 def _check_param(name, param, grid):
@@ -115,26 +137,6 @@ def _check_param(name, param, grid):
     else:
         raise ValueError(f'{name} too big: {param}')
     return idx
-
-
-def bernstein_bases(degree, t):
-    r"""Bernstein bases of given *degree*, evaluated at *t*.
-
-    Returns a list of values corresponding to
-    :math:`i = 0, \ldots, n`, given the degree :math:`n`,
-    using the formula
-
-    .. math::
-
-        b_{i,n}(t) = {n \choose i} t^i \left( 1 - t \right)^{n - i},
-
-    with the *binomial coefficient*
-    :math:`{n \choose i} = \frac{n!}{i!(n - i)!}`.
-
-    """
-    return [
-        _comb(degree, i) * t**i * (1 - t)**(degree - i)
-        for i in range(degree + 1)]
 
 
 def _comb(n, k):
@@ -240,7 +242,7 @@ def _natural_tangent(vertices, times, tangent):
     return (3 * x1 - 3 * x0 - delta * tangent) / (2 * delta)
 
 
-class CubicHermite(PiecewiseCurve):
+class CubicHermite(Monomial):
     """Cubic Hermite curve, see __init__()."""
 
     matrix = _np.array([
@@ -260,6 +262,7 @@ class CubicHermite(PiecewiseCurve):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
 
         """
         if len(vertices) < 2:
@@ -277,7 +280,7 @@ class CubicHermite(PiecewiseCurve):
                 zip(vertices, vertices[1:]),
                 zip(tangents[::2], tangents[1::2]),
                 zip(grid, grid[1:]))]
-        PiecewiseCurve.__init__(self, segments, grid)
+        Monomial.__init__(self, segments, grid)
 
 
 class CatmullRom(CubicHermite):
@@ -310,11 +313,14 @@ class CatmullRom(CubicHermite):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
         :param alpha: TODO
+        :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
             and an additional *grid* time has to be specified.
+        :type endconditions: optional
 
         """
         closed = endconditions == 'closed'
@@ -385,13 +391,17 @@ class KochanekBartels(CubicHermite):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior vertices.
+        :type tcb: optional
         :param alpha: TODO
+        :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
             and an additional *grid* time has to be specified.
+        :type endconditions: optional
 
         """
         closed = endconditions == 'closed'
@@ -434,11 +444,14 @@ class Natural(CubicHermite):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
         :param alpha: TODO
+        :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
             and an additional *grid* time has to be specified.
+        :type endconditions: optional
 
         """
         N = len(vertices)
@@ -540,8 +553,10 @@ class ShapePreservingCubic1D(FiniteDifference):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
         :param slopes: Sequence of slopes or ``None`` if slope should be
             computed from neighboring values.
+        :type slopes: optional
 
         """
         if len(values) < 2:
@@ -771,6 +786,7 @@ class NewGridAdapter:
             Instead of a value, ``None`` can be specified to choose a
             value automatically.
             The first and last value cannot be ``None``.
+        :type new_grid: optional
 
         """
         if _np.isscalar(new_grid):

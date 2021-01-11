@@ -403,10 +403,13 @@ class KochanekBartels(DeCasteljau):
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior quaternions.
             If only two quaternions are given, TCB values are ignored.
+        :type tcb: optional
         :param alpha: TODO
+        :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
 
@@ -414,6 +417,7 @@ class KochanekBartels(DeCasteljau):
 
             If ``'closed'``, the first rotation is re-used as last rotation
             and an additional *grid* time has to be specified.
+        :type endconditions: optional
 
         """
         closed = endconditions == 'closed'
