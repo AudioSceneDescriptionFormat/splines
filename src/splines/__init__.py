@@ -79,8 +79,9 @@ class PiecewiseBezierCurve:
             each one consisting of multiple control points.
             Different segments can have different numbers of control points
             (and therefore different polynomial degrees).
-        :param grid: Sequence of parameter values.
-            Must be strictly increasing.
+        :param grid: Sequence of parameter values corresponding to
+            segment boundaries.  Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
 
         """
         self.segments = [_np.array(control_points, copy=True)
@@ -258,6 +259,7 @@ class CubicHermite(PiecewiseCurve):
             (two per segment, outgoing and incoming).
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
 
         """
         if len(vertices) < 2:
@@ -307,6 +309,7 @@ class CatmullRom(CubicHermite):
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :param alpha: TODO
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
@@ -381,6 +384,7 @@ class KochanekBartels(CubicHermite):
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior vertices.
         :param alpha: TODO
@@ -429,6 +433,7 @@ class Natural(CubicHermite):
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :param alpha: TODO
         :param endconditions: Start/end conditions. Can be ``'closed'``,
             ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
@@ -534,6 +539,7 @@ class ShapePreservingCubic1D(FiniteDifference):
         :param values: Sequence of values to be interpolated.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :param slopes: Sequence of slopes or ``None`` if slope should be
             computed from neighboring values.
 

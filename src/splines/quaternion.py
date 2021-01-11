@@ -256,6 +256,7 @@ class PiecewiseSlerp:
             Must be strictly increasing.
             Must have the same length as *quaternions*, except when *closed*
             is ``True``, where it must be one element longer.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :type grid: optional
         :param closed: If ``True``, the first quaternion is repeated at
             the end.
@@ -300,6 +301,7 @@ class DeCasteljau:
             Different segments can have different numbers of control points.
         :param grid: Sequence of parameter values corresponding to
             segment boundaries.  Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :type grid: optional
 
         """
@@ -400,6 +402,7 @@ class KochanekBartels(DeCasteljau):
         :param quaternions: Sequence of quaternions.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior quaternions.
             If only two quaternions are given, TCB values are ignored.
