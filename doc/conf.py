@@ -23,6 +23,7 @@ autodoc_member_order = 'bysource'
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
+    'show-inheritance': True,
 }
 
 default_role = 'any'

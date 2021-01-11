@@ -14,7 +14,7 @@ from math import factorial as _factorial
 import numpy as _np
 
 
-__version__ = '0.0'
+__version__ = '0.0.0'
 
 
 class PiecewiseCurve:
