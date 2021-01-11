@@ -25,7 +25,7 @@ jobs:
           python3 -m pip install -r doc/requirements.txt
       - name: Build HTML
         run: |
-          python3 -m sphinx -W --keep-going --color doc/ _build/html/ -d _doctrees/ -b html
+          python3 -m sphinx -W --keep-going --color doc/ _build/html/ -d _build/doctrees/ -b html
       - name: Upload HTML
         uses: actions/upload-artifact@v2
         with:
@@ -33,7 +33,7 @@ jobs:
           path: _build/html/
       - name: Build LaTeX sources
         run: |
-          python3 -m sphinx -W --keep-going --color doc/ _build/latex/ -d _doctrees/ -b latex
+          python3 -m sphinx -W --keep-going --color doc/ _build/latex/ -d _build/doctrees/ -b latex
       - name: Run LaTeX
         uses: dante-ev/latex-action@master
         with:
@@ -46,7 +46,7 @@ jobs:
           path: _build/latex/splines.pdf
       - name: Check links
         run: |
-          python3 -m sphinx -W --keep-going --color doc/ _build/linkcheck/ -d _doctrees/ -b linkcheck
+          python3 -m sphinx -W --keep-going --color doc/ _build/linkcheck/ -d _build/doctrees/ -b linkcheck
       - name: Upload linkcheck results
         uses: actions/upload-artifact@v2
         if: ${{ success() || failure() }}
