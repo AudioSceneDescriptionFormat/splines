@@ -1,6 +1,7 @@
 """Helper functions for plotting."""
 import matplotlib.pyplot as _plt
 import numpy as _np
+import sympy as _sp
 
 
 def plot_slopes_1d(slopes, values, grid, scale=1, ax=None, **kwargs):
@@ -62,3 +63,45 @@ def plot_spline_2d(spline, dots_per_second=15, marker='.', linestyle='',
         linestyle=linestyle,
         **kwargs)
     ax.axis('equal')
+
+
+def grid_lines(x=None, y=None, ax=None):
+    if ax is None:
+        ax = _plt.gca()
+    if x is not None:
+        ax.set_xticks(x)
+        ax.xaxis.grid(True)    
+    if y is not None:
+        ax.set_yticks(y)
+        ax.yaxis.grid(True)    
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.xaxis.set_ticks_position('none')
+    ax.yaxis.set_ticks_position('none')
+
+
+def latexify(expr):
+    """Convert SymPy expression to LaTeX string."""
+    # \boldsymbol is not available, see:
+    # https://github.com/matplotlib/matplotlib/issues/1366
+    return _sp.latex(expr, mode='inline').replace(r'\boldsymbol', r'\mathbf')
+
+
+def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
+    """Plot a polynomial basis (given as SymPy expressions)."""
+    if ax is None:
+        ax = _plt.gca()
+    for line in _sp.plot(*args, (parameter, 0, 1), show=False):
+        # alternatively, LineCollection could be used with get_segments()
+        x, y = line.get_points()
+        # if the function is constant, SymPy only emits one value:
+        x, y = _np.broadcast_arrays(x, y)
+        ax.plot(x, y)
+    ax.autoscale()
+    grid_lines([0, 1], [0, 1], ax=ax)
+    if labels:
+        ax.legend([latexify(l) for l in labels])
+    ax.set_xlabel(latexify(parameter))
+    ax.set_ylabel('weight')
