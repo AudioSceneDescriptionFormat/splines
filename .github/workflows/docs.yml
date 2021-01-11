@@ -44,3 +44,12 @@ jobs:
         with:
           name: PDF
           path: _build/latex/splines.pdf
+      - name: Check links
+        run: |
+          python3 -m sphinx -W --keep-going --color doc/ _build/linkcheck/ -d _doctrees/ -b linkcheck
+      - name: Upload linkcheck results
+        uses: actions/upload-artifact@v2
+        if: ${{ success() || failure() }}
+        with:
+          name: linkcheck
+          path: _build/linkcheck/output.*
