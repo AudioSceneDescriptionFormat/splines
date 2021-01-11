@@ -438,7 +438,7 @@ class Natural(CubicHermite):
                  endconditions='natural'):
         """Natural spline.
 
-        See :ref:`/euclidean/natural-splines.ipynb`.
+        See :ref:`/euclidean/natural.ipynb`.
 
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
