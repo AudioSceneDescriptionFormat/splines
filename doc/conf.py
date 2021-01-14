@@ -35,9 +35,14 @@ nbsphinx_execute_arguments = [
 
 def if_docname(text):
     return r"""
-{% if env.docname not in [
-    'index',
-    'catmull-rom',
+{% if not env.docname.endswith('index') and env.docname not in [
+    'euclidean/hermite',
+    'euclidean/natural',
+    'euclidean/bezier',
+    'euclidean/catmull-rom',
+    'euclidean/finite-difference',
+    'euclidean/kochanek-bartels',
+    'euclidean/end-conditions',
 ] %}
 {% set docname = 'doc/' + env.doc2path(env.docname, base=None) %}
 {% set latex_href = ''.join([
