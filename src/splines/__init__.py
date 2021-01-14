@@ -348,6 +348,8 @@ class FiniteDifference(CatmullRom):
 
         Same parameters as `CatmullRom`.
 
+        See :ref:`/euclidean/finite-difference.ipynb`.
+
         """
         super().__init__(
             vertices, grid, alpha=alpha, endconditions=endconditions)
