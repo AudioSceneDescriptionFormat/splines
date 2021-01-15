@@ -19,6 +19,15 @@ def plot_slopes_1d(slopes, values, grid, scale=1, ax=None, **kwargs):
             pivot=pivot, **kwargs)
 
 
+def plot_spline_1d(spline, ax=None, samples=100, **kwargs):
+    """Plot a one-dimensional spline."""
+    if ax is None:
+        ax = _plt.gca()
+    times = _np.linspace(spline.grid[0], spline.grid[-1], samples)
+    ax.plot(times, spline.evaluate(times), **kwargs)
+    ax.scatter(spline.grid, spline.evaluate(spline.grid))
+
+
 def plot_tangents_2d(tangents, vertices, scale=1, ax=None, **kwargs):
     """Plot incoming and outging tangents for 2D spline."""
     if ax is None:
