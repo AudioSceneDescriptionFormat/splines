@@ -389,6 +389,8 @@ class KochanekBartels(CubicHermite):
                  endconditions='natural'):
         """Kochanek--Bartels spline.
 
+        See :ref:`/euclidean/kochanek-bartels.ipynb`.
+
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
