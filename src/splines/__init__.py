@@ -507,7 +507,7 @@ class Natural(CubicHermite):
         if closed:
             tangents = _np.concatenate([tangents, tangents[:1]])
         # Duplicate inner tangents (incoming and outgoing are the same):
-        tangents = _np.row_stack(
+        tangents = _np.concatenate(
             [tangents[i:i + 2] for i in range(len(tangents) - 1)])
         CubicHermite.__init__(self, vertices, tangents, grid)
 
