@@ -1,5 +1,6 @@
 """Helper functions for plotting."""
 import matplotlib.pyplot as _plt
+from matplotlib.collections import LineCollection
 import numpy as _np
 import sympy as _sp
 
@@ -28,27 +29,37 @@ def plot_spline_1d(spline, ax=None, samples=100, **kwargs):
     ax.scatter(spline.grid, spline.evaluate(spline.grid))
 
 
-def plot_tangents_2d(tangents, vertices, scale=1, ax=None, **kwargs):
-    """Plot incoming and outging tangents for 2D spline."""
+def plot_tangent_2d(tangent, vertex, color='lightgrey', outgoing=True,
+                    scale=1, ax=None, **kwargs):
+    """Plot outgoing or incoming 2D tangent."""
+    if ax is None:
+        ax = _plt.gca()
+    ax.quiver(
+        *vertex, *tangent,
+        scale=scale, scale_units='xy', angles='xy', color=color,
+        pivot='tail' if outgoing else 'tip', **kwargs)
+    if outgoing:
+        endpoint = _np.add(vertex, tangent)
+    else:
+        endpoint = _np.subtract(vertex, tangent)
+    # Plot an invisible point at the end of the tangent vector
+    # to make sure the vector is visible when the plot is autoscaled.
+    # NB: Selecting a (unused) color to not disturb the color cycle.
+    ax.scatter(*endpoint, marker='', color='green')
+
+
+def plot_tangents_2d(tangents, vertices, color='lightgrey',
+                     scale=1, ax=None, **kwargs):
+    """Plot outgoing and incoming tangents for 2D spline."""
     if ax is None:
         ax = _plt.gca()
     tangents = _np.asarray(tangents)
     vertices = _np.asarray(vertices)
-    for tangents, vertices, outgoing in (
-            [tangents[::2], vertices[:-1], True],
-            [tangents[1::2], vertices[1:], False]):
-        ax.quiver(
-            *vertices.T, *tangents.T,
-            scale=scale, scale_units='xy', angles='xy', color='lightgrey',
-            pivot='tail' if outgoing else 'tip', **kwargs)
-        if outgoing:
-            endpoints = vertices + tangents
-        else:
-            endpoints = vertices - tangents
-        # Plot invisible points at the ends of the tangent vectors
-        # to make sure the vectors are visible when the plot is autoscaled.
-        # NB: Selecting a (unused) color to not disturb the color cycle.
-        ax.scatter(*endpoints.T, marker='', color='green')
+    for i in range(len(vertices) - 1):
+        plot_tangent_2d(tangents[2 * i], vertices[i], color=color, **kwargs)
+        plot_tangent_2d(
+            tangents[2 * i + 1], vertices[i + 1], color=color, outgoing=False,
+            **kwargs)
 
 
 def plot_spline_2d(spline, dots_per_second=15, marker='.', linestyle='',
@@ -79,10 +90,10 @@ def grid_lines(x=None, y=None, ax=None):
         ax = _plt.gca()
     if x is not None:
         ax.set_xticks(x)
-        ax.xaxis.grid(True)    
+        ax.xaxis.grid(True)
     if y is not None:
         ax.set_yticks(y)
-        ax.yaxis.grid(True)    
+        ax.yaxis.grid(True)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
@@ -92,18 +103,39 @@ def grid_lines(x=None, y=None, ax=None):
 
 
 def latexify(expr):
-    """Convert SymPy expression to LaTeX string."""
+    """Convert SymPy expression to LaTeX string.
+
+    Strings are passed through unchanged.
+
+    """
+    if isinstance(expr, str):
+        return expr
     # \boldsymbol is not available, see:
     # https://github.com/matplotlib/matplotlib/issues/1366
     return _sp.latex(expr, mode='inline').replace(r'\boldsymbol', r'\mathbf')
+
+
+def plot_sympy(*args, ax=None, **kwargs):
+    """Plot a SymPy expression into a Matplotlib plot."""
+    if ax is None:
+        ax = _plt.gca()
+    for line in _sp.plot(*args, show=False, **kwargs):
+        # NB: line.get_points() works only for smooth plots
+        segments = line.get_segments()
+        # Dummy plot to use default color cycle
+        dummy, = ax.plot([])
+        ax.add_collection(LineCollection(segments, color=dummy.get_color()))
+        dummy.remove()
+    ax.autoscale()
 
 
 def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
     """Plot a polynomial basis (given as SymPy expressions)."""
     if ax is None:
         ax = _plt.gca()
+    # Alternatively, plot_sympy() could be used, but using LineCollection
+    # would inhibit automatic placement of the legend
     for line in _sp.plot(*args, (parameter, 0, 1), show=False):
-        # alternatively, LineCollection could be used with get_segments()
         x, y = line.get_points()
         # if the function is constant, SymPy only emits one value:
         x, y = _np.broadcast_arrays(x, y)

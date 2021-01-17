@@ -309,6 +309,20 @@ class CatmullRom(CubicHermite):
                  endconditions='natural'):
         """Catmull--Rom spline.
 
+        This class implements one specific member of the family of
+        splines described in :cite:`catmull1974splines`,
+        which is commonly known as *Catmull--Rom spline*:
+        The cubic spline that can be constructed by linear Lagrange
+        interpolation (and extrapolation) followed by quadratic B-spline
+        blending, or equivalently, quadratic Lagrange interpolation
+        followed by linear B-spline blending.
+
+        The implementation used in this class, however, does nothing of
+        that sort.  It simply calculates the appropriate tangent vectors
+        at the control points and instantiates a `CubicHermite` spline.
+
+        See :ref:`/euclidean/catmull-rom.ipynb`.
+
         :param vertices: Sequence of vertices.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
