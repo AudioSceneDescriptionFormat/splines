@@ -528,44 +528,40 @@ class Natural(CubicHermite):
         CubicHermite.__init__(self, vertices, tangents, grid)
 
 
-def _monotone_end_condition(inner_slope, chord_slope):
+def _monotone_end_condition(inner_slope, secant_slope):
     """
 
     Return the "outer" (i.e. first or last) slope given the "inner"
-    (i.e. second or penultimate) slope and the slope of the
-    corresponding chord.
+    (i.e. second or penultimate) slope and the secant slope of the
+    first or last segment.
 
     """
     # NB: This is a very ad-hoc algorithm meant to minimize the change in slope
     # within the first/last curve segment.  Especially, this should avoid a
     # change from negative to positive acceleration (and vice versa).
     # There might be a better method available!?!
-    if chord_slope < 0:
-        return -_monotone_end_condition(-inner_slope, -chord_slope)
-    assert 0 <= inner_slope <= 3 * chord_slope
-    if inner_slope <= chord_slope:
-        return 3 * chord_slope - 2 * inner_slope
+    if secant_slope < 0:
+        return -_monotone_end_condition(-inner_slope, -secant_slope)
+    assert 0 <= inner_slope <= 3 * secant_slope
+    if inner_slope <= secant_slope:
+        return 3 * secant_slope - 2 * inner_slope
     else:
-        return (3 * chord_slope - inner_slope) / 2
+        return (3 * secant_slope - inner_slope) / 2
 
 
-class ShapePreservingCubic1D(FiniteDifference):
-    """Shape-preserving cubic curve, see __init__()."""
+class PiecewiseMonotoneCubic(CatmullRom):
+    """Piecewise monotone cubic curve, see __init__()."""
 
     def __init__(self, values, grid=None, slopes=None, *, alpha=None,
                  closed=False):
-        """Shape-preserving cubic curve.
+        """Piecewise monotone cubic curve.
 
-        Similar to `scipy.interpolate.PchipInterpolator`.
+        See :ref:`/euclidean/piecewise-monotone.ipynb`.
 
         This only works for one-dimensional values.
 
         For undefined slopes, ``_calculate_tangent()`` is called on
         the base class.
-
-        If no *slopes* are given, the curve also preserves
-        concavity/convexity, otherwise it only preserves monotonicity
-        and local extrema.
 
         :param values: Sequence of values to be interpolated.
         :param grid: Sequence of parameter values.
@@ -573,7 +569,8 @@ class ShapePreservingCubic1D(FiniteDifference):
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :type grid: optional
         :param slopes: Sequence of slopes or ``None`` if slope should be
-            computed from neighboring values.
+            computed from neighboring values.  An error is raised
+            if a segment would become non-monotone with a given slope.
         :type slopes: optional
 
         """
@@ -598,7 +595,7 @@ class ShapePreservingCubic1D(FiniteDifference):
             grid = list(grid) + [grid[-1] + first_interval]
 
         def fix_slope(slope, left, right):
-            """Manipulate the slope to preserve shape.
+            """Manipulate the slope to preserve monotonicity.
 
             See Dougherty et al. (1989), eq. (4.2)
 
@@ -631,35 +628,41 @@ class ShapePreservingCubic1D(FiniteDifference):
         if closed:
             # Move last outgoing slope to front:
             final_slopes = final_slopes[-1:] + final_slopes[:-1]
+            values = values[:-1]
+            grid = grid[:-1]
         elif not final_slopes:
-            chord = (values[1] - values[0]) / (grid[1] - grid[0])
+            secant_slope = (values[1] - values[0]) / (grid[1] - grid[0])
             one, two = slopes
 
             def check_slope(slope):
-                if slope != fix_slope(slope, chord, chord):
+                if slope != fix_slope(slope, secant_slope, secant_slope):
                     raise ValueError(f'Slope too steep or wrong sign: {slope}')
 
             if one is None:
                 if two is None:
-                    final_slopes = [chord] * 2
+                    final_slopes = [secant_slope] * 2
                 else:
                     check_slope(two)
-                    final_slopes = [_monotone_end_condition(two, chord), two]
+                    final_slopes = [
+                        _monotone_end_condition(two, secant_slope),
+                        two]
             else:
                 if two is None:
                     check_slope(one)
-                    final_slopes = [one, _monotone_end_condition(one, chord)]
+                    final_slopes = [
+                        one,
+                        _monotone_end_condition(one, secant_slope)]
                 else:
                     check_slope(one)
                     check_slope(two)
                     final_slopes = [one, two]
         else:
 
-            def end_slope(outer, inner, chord):
+            def end_slope(outer, inner, secant_slope):
                 if outer is None:
-                    outer = _monotone_end_condition(inner, chord)
+                    outer = _monotone_end_condition(inner, secant_slope)
                 else:
-                    if outer != fix_slope(outer, chord, chord):
+                    if outer != fix_slope(outer, secant_slope, secant_slope):
                         raise ValueError(
                             f'Slope too steep or wrong sign: {outer}')
                 return outer
@@ -674,26 +677,37 @@ class ShapePreservingCubic1D(FiniteDifference):
         CubicHermite.__init__(self, values, final_slopes, grid)
 
 
-class MonotoneCubic1D(ShapePreservingCubic1D):
+class MonotoneCubic(PiecewiseMonotoneCubic):
     """Monotone cubic curve, see __init__()."""
 
     def __init__(self, values, *args, **kwargs):
         """Monotone cubic curve.
 
-        Specialization of `ShapePreservingCubic1D`.
+        This takes the same arguments as `PiecewiseMonotoneCubic`
+        (except ``closed``), but it raises an error if the given values
+        are not montone.
+
+        See :ref:`/euclidean/piecewise-monotone.ipynb#Monotone-Interpolation`.
 
         """
-        # TODO: check if values are monotone
-        ShapePreservingCubic1D.__init__(self, values, *args, **kwargs)
+        if 'closed' in kwargs:
+            raise TypeError('The "closed" argument is not allowed')
+        PiecewiseMonotoneCubic.__init__(self, values, *args, **kwargs)
+        diffs = _np.diff(values)
+        if not (all(diffs >= 0) or all(diffs <= 0)):
+            raise ValueError('Only monotone values are allowed')
 
     # TODO: rename to something with "solve"?
     def get_time(self, value):
         """Get the time instance for the given value.
 
-        If the solution is not unique (i.e. non-monotonic or repeated
-        values), None is returned.
+        If the solution is not unique (i.e. there is a plateau),
+        ``None`` is returned.
 
         """
+        if not _np.isscalar(value):
+            return _np.array([self.get_time(v) for v in value])
+
         values = self.evaluate(self.grid)
         if values[0] <= value <= values[-1]:
             # Increasing values
@@ -712,7 +726,7 @@ class MonotoneCubic1D(ShapePreservingCubic1D):
         # First, check for exact matches to find plateaus
         matches, = _np.nonzero(values == value)
         if len(matches) > 1:
-            return None  # non-monotonic or plateau
+            return None
         if len(matches) == 1:
             return self.grid[matches[0]]
 

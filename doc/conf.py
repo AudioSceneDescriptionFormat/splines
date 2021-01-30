@@ -30,6 +30,11 @@ autodoc_default_options = {
 
 default_role = 'any'
 
+linkcheck_ignore = [
+    # Anchors with line numbers don't seem to work with linkcheck builder
+    'https://github.com/scipy/scipy/blob/',
+]
+
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
 ]
@@ -150,6 +155,7 @@ latex_elements = {
 }{
     \renewcommand{\ttdefault}{lmtt}  % typewriter font from lmodern
 }
+\usepackage{mathrsfs}  % for \mathscr{}
 """,
 }
 
