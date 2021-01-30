@@ -8,8 +8,7 @@ References
     \def\chapter#1#2{}
     \begin{thebibliography}{123456}
 
-.. bibliography:: references.bib
-    :all:
+.. bibliography::
     :style: alpha
 
 .. raw:: latex

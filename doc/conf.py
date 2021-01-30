@@ -12,6 +12,8 @@ extensions = [
     'sphinx_last_updated_by_git',
 ]
 
+bibtex_bibfiles = ['references.bib']
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
@@ -158,8 +160,6 @@ latex_domain_indices = False
 latex_documents = [
     ('index', 'splines.tex', project, author, 'howto'),
 ]
-
-latex_additional_files = ['references.bib']
 
 # -- Options for Epub output -------------------------------------------------
 
