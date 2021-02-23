@@ -194,10 +194,6 @@ def _check_endconditions(endconditions, vertices, grid):
     return (start, end, *triples)
 
 
-def _check_endconditions_and_zip(endconditions, vertices, grid):
-    pass
-
-
 def _check_tangents(tangents, vertices, grid, start, end, *, closed):
     if closed:
         # Move last (outgoing) tangent to the beginning:
