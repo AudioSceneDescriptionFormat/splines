@@ -285,7 +285,7 @@ class CatmullRom(CubicHermite):
     # NB: Catmull-Rom could be implemented as special case of Kochanek-Bartels,
     #     but here we chose not to.
 
-    # NB: We could use the characteristic matrix for Catmull-Rom splines, but
+    # NB: We could use the basis matrix for Catmull-Rom splines, but
     #     this wouldn't work if only 3 vertices are given by the user.
     #     Since we have to handle this special case anyway, we use the same
     #     method for everything.  Apart from reducing the amount of code, this
