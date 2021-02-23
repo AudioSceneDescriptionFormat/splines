@@ -47,7 +47,6 @@ def if_docname(text):
     'euclidean/natural',
     'euclidean/bezier',
     'euclidean/catmull-rom',
-    'euclidean/finite-difference',
     'euclidean/kochanek-bartels',
     'euclidean/end-conditions',
 ] %}

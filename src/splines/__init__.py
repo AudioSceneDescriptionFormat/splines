@@ -294,7 +294,7 @@ class CatmullRom(CubicHermite):
     #     Since we have to handle this special case anyway, we use the same
     #     method for everything.  Apart from reducing the amount of code, this
     #     also allows us to define derived classes that overwrite
-    #     _calculate_tangent(), e.g. FiniteDifference.
+    #     _calculate_tangent().
 
     @staticmethod
     def _calculate_tangent(points, times):
@@ -350,29 +350,6 @@ class CatmullRom(CubicHermite):
         tangents = _check_tangents(
             tangents, vertices, grid, start, end, closed=closed)
         CubicHermite.__init__(self, vertices, tangents, grid)
-
-
-class FiniteDifference(CatmullRom):
-    """Finite difference spline, see __init__()."""
-
-    # NB: This function is only needed for creating the documentation:
-    def __init__(self, vertices, grid=None, *, alpha=None,
-                 endconditions='natural'):
-        """Finite difference spline.
-
-        Same parameters as `CatmullRom`.
-
-        See :ref:`/euclidean/finite-difference.ipynb`.
-
-        """
-        super().__init__(
-            vertices, grid, alpha=alpha, endconditions=endconditions)
-
-    @staticmethod
-    def _calculate_tangent(points, times):
-        x_1, x0, x1 = _np.asarray(points)
-        t_1, t0, t1 = times
-        return ((x0 - x_1) / (t0 - t_1) + (x1 - x0) / (t1 - t0)) / 2
 
 
 class KochanekBartels(CubicHermite):
