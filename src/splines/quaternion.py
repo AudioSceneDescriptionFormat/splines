@@ -72,7 +72,6 @@ class Quaternion:
         b2, c2, d2 = other.vector
         return Quaternion.__new__(
             result_type,
-            # TODO: properly derive this
             a1*a2 - b1*b2 - c1*c2 - d1*d2,
             (
                 a1*b2 + b1*a2 + c1*d2 - d1*c2,
