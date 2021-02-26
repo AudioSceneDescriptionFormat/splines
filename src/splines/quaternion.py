@@ -352,18 +352,17 @@ class DeCasteljau:
 def _reduce_de_casteljau(segment, t):
     """Obtain two quaternions for the last step of De Castelau's algorithm.
 
-    Recursively applies `slerp()` to neighboring control quaternions
+    Repeatedly applies `slerp()` to neighboring control quaternions
     until only two are left.
 
     """
     if len(segment) < 2:
         raise ValueError('Segment must have at least two quaternions')
-    if len(segment) == 2:
-        return segment
-    return _reduce_de_casteljau([
-        slerp(one, two, t)
-        for one, two in zip(segment, segment[1:])
-    ], t)
+    while len(segment) > 2:
+        segment = [
+            slerp(one, two, t)
+            for one, two in zip(segment, segment[1:])]
+    return segment
 
 
 class KochanekBartels(DeCasteljau):
