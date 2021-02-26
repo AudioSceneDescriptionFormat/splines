@@ -246,9 +246,17 @@ class DumbAxes3D(Axes3D):
         renderer.get_axis_position = NotImplemented
 
         for coll in self.collections:
-            coll.do_3d_projection()
+            try:
+                # The "renderer" argument has been deprecated
+                coll.do_3d_projection()
+            except TypeError:
+                coll.do_3d_projection(renderer)
         for patch in self.patches:
-            patch.do_3d_projection()
+            try:
+                # The "renderer" argument has been deprecated
+                patch.do_3d_projection()
+            except TypeError:
+                patch.do_3d_projection(renderer)
 
         super(Axes3D, self).draw(renderer)
 
