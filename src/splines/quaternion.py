@@ -226,6 +226,8 @@ class UnitQuaternion(Quaternion):
 def slerp(one, two, t):
     """Spherical linear interpolation.
 
+    See :ref:`/rotation/slerp.ipynb`.
+
     :param one: Start quaternion.
     :param two: End quaternion.
     :param t: Parameter value(s) between 0 and 1.
@@ -250,7 +252,10 @@ class PiecewiseSlerp:
     def __init__(self, quaternions, *, grid=None, closed=False):
         """Piecewise Slerp.
 
-        :param quaternions: Sequence of quaternions to be interpolated.
+        See :ref:`/rotation/slerp.ipynb#Piecewise-Slerp`.
+
+        :param quaternions: Sequence of rotations to be interpolated.
+            The quaternions will be `canonicalized()`.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             Must have the same length as *quaternions*, except when *closed*
@@ -397,7 +402,8 @@ class KochanekBartels(DeCasteljau):
                  endconditions='natural'):
         """Kochanek--Bartels-like rotation spline.
 
-        :param quaternions: Sequence of quaternions.
+        :param quaternions: Sequence of rotations to be interpolated.
+            The quaternions will be `canonicalized()`.
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
