@@ -246,9 +246,9 @@ class DumbAxes3D(Axes3D):
         renderer.get_axis_position = NotImplemented
 
         for coll in self.collections:
-            coll.do_3d_projection(renderer)
+            coll.do_3d_projection()
         for patch in self.patches:
-            patch.do_3d_projection(renderer)
+            patch.do_3d_projection()
 
         super(Axes3D, self).draw(renderer)
 
