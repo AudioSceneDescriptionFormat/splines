@@ -1,6 +1,6 @@
 """Helper functions for plotting rotations."""
 from functools import partial
-from math import radians
+from math import radians, degrees, atan2, asin
 
 import matplotlib
 from matplotlib.animation import FuncAnimation
@@ -273,3 +273,25 @@ def angles2quat(azimuth, elevation, roll):
         UnitQuaternion.from_axis_angle((1, 0, 0), radians(elevation)) *
         UnitQuaternion.from_axis_angle((0, 1, 0), radians(roll))
     )
+
+
+# See https://AudioSceneDescriptionFormat.readthedocs.io/quaternions.html
+def quat2angles(quat):
+    a, b, c, d = quat.wxyz
+    sin_elevation = 2 * (a * b + c * d)
+    if 0.999999 < sin_elevation:
+        # elevation ~= 90°
+        return (
+            degrees(atan2(2 * (a * c + b * d), 2 * (a * b - c * d))),
+            90,
+            0)
+    elif sin_elevation < -0.999999:
+        # elevation ~= -90°
+        return (
+            degrees(atan2(-2 * (a * c + b * d), 2 * (c * d - a * b))),
+            -90,
+            0)
+    return (
+        degrees(atan2(2 * (a * d - b * c), 1 - 2 * (b**2 + d**2))),
+        degrees(asin(sin_elevation)),
+        degrees(atan2(2 * (a * c - b * d), 1 - 2 * (b**2 + c**2))))
