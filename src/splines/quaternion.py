@@ -218,6 +218,14 @@ class UnitQuaternion(Quaternion):
     def angle(self):
         return 2 * _math.acos(self.scalar)
 
+    def rotation_to(self, other):
+        """Rotation required to rotate *self* into *other*.
+
+        See :ref:`/rotation/quaternions.ipynb#Relative-Rotation-(Global-Frame-of-Reference)`.
+
+        """
+        return other * self.inverse()
+
     def rotate_vector(self, v):
         rotated = self * Quaternion(0, v) * self.inverse()
         return rotated.vector
