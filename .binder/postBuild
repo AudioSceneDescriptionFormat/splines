@@ -2,4 +2,4 @@
 
 set -e
 
-python -m pip install -e .
+# Add your commands here
