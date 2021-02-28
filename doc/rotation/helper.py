@@ -221,7 +221,14 @@ class DumbAxes3D(Axes3D):
             raise TypeError('sharex not supported')
         if sharey is not None:
             raise TypeError('sharey not supported')
-        super().__init__(figure, rect=rect)
+        try:
+            # "auto_add_to_figure" was added in Matplotlib 3.4.0,
+            # its default will change to False in Matplotlib 3.5.
+            # Once Matplotlib 3.4.x is no longer supported,
+            # this work-around can be removed.
+            super().__init__(figure, auto_add_to_figure=False, rect=rect)
+        except AttributeError:
+            super().__init__(figure, rect=rect)
         self.set_axis_off()
         self.set_figure(figure)
         self.disable_mouse_rotation()
