@@ -302,32 +302,3 @@ def quat2angles(quat):
         degrees(atan2(2 * (a * d - b * c), 1 - 2 * (b**2 + d**2))),
         degrees(asin(sin_elevation)),
         degrees(atan2(2 * (a * c - b * d), 1 - 2 * (b**2 + c**2))))
-
-
-def squashed_tangent_space(zero, x, y):
-    """Return a function that squashes a quaternion into 2D coordinates.
-    
-    The returned function projects the given quaternion(s)
-    into the 3D tangent space at *zero* and then projects the result(s)
-    into a two-dimensional plane.
-    The quaternion *zero* lies at the origin of this plane,
-    the x-axis points from *zero* to *x* and
-    *y* is also part of this plane (at a positive y-coordinate).
-    
-    """
-
-    def normalize(v):
-        return v / np.linalg.norm(v)
-    
-    unit_x = normalize((zero.rotation_to(x)).log_map())
-    unit_z = normalize(np.cross(unit_x, (zero.rotation_to(y)).log_map()))
-    unit_y = np.cross(unit_z, unit_x)
-    R = np.row_stack([unit_x, unit_y, unit_z])
-
-    def squash(q):
-        if not hasattr(q, 'log_map'):
-            return np.array([squash(q) for q in q])
-        tangent = zero.rotation_to(q).log_map()
-        return (R @ tangent)[:2]
-    
-    return squash

@@ -490,6 +490,9 @@ class CatmullRom(KochanekBartels):
 
         This is just `KochanekBartels` without TCB values.
 
+        See :ref:`/rotation/catmull-rom-uniform.ipynb`
+        and :ref:`/rotation/catmull-rom-non-uniform.ipynb`.
+
         """
         super().__init__(
             quaternions, grid, tcb=(0, 0, 0),
