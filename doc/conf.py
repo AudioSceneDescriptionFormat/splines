@@ -127,8 +127,8 @@ html_copy_source = False
 html_permalinks_icon = '§'
 html_show_copyright = False
 
-mathjax_config = {
-    'TeX': {'equationNumbers': {'autoNumber': 'AMS', 'useLabelIds': True}},
+mathjax3_config = {
+    'tex': {'tags': 'ams', 'useLabelIds': True},
 }
 
 # -- Options for LaTeX output ------------------------------------------------
