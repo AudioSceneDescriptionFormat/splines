@@ -124,7 +124,7 @@ html_theme = 'insipid'
 html_domain_indices = False
 html_favicon = 'favicon.svg'
 html_copy_source = False
-html_add_permalinks = '\N{SECTION SIGN}'
+html_permalinks_icon = '§'
 html_show_copyright = False
 
 mathjax_config = {
