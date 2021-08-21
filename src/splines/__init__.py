@@ -23,27 +23,33 @@ class Monomial:
     def __init__(self, segments, grid):
         r"""Piecewise polynomial curve using monomial basis.
 
-        Arbitrary degree, arbitrary dimension.
+        See :ref:`/euclidean/polynomials.ipynb`.
+
+        Coefficients can have arbitrary dimension.
+        An arbitrary polynomial degree :math:`d` can be used by specifying
+        :math:`d + 1` coefficients per segment.
+        The :math:`i`-th segment is evaluated using this equation:
 
         .. math::
 
-            \boldsymbol{p}_i(t) = \sum_{k=0}^n
-                \boldsymbol{a}_k \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
+            \boldsymbol{p}_i(t) = \sum_{k=0}^d
+                \boldsymbol{a}_{i,k} \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
                 \text{ for } t_i \leq t < t_{i+1}
 
-        Similar to https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PPoly.html,
-        which states:
+        This is similar to `scipy.interpolate.PPoly`, which states:
 
             "High-order polynomials in the power basis can be numerically
             unstable.  Precision problems can start to appear for orders
             larger than 20-30."
 
+        This shouldn't be a problem since most commonly splines of degree 3
+        (i.e. cubic splines) are used.
 
         :param segments: Sequence of polynomial segments.
-            Each segment contains coefficients for the monomial basis
-            (in order of decreasing degree).
+            Each segment :math:`\boldsymbol{a}_i` contains coefficients
+            for the monomial basis (in order of decreasing degree).
             Different segments can have different polynomial degree.
-        :param grid: Sequence of parameter values corresponding to
+        :param grid: Sequence of parameter values :math:`t_i` corresponding to
             segment boundaries.  Must be strictly increasing.
 
         """
@@ -54,7 +60,7 @@ class Monomial:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
-        """Get value (or *n*-th derivative) at given parameter value(s)."""
+        """Get value (or *n*-th derivative) at given parameter value(s) *t*."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(time, n) for time in t])
 

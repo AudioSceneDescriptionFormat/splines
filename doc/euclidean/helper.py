@@ -1,6 +1,5 @@
 """Helper functions for plotting."""
 import matplotlib.pyplot as _plt
-from matplotlib.collections import LineCollection
 import numpy as _np
 import sympy as _sp
 
@@ -117,6 +116,7 @@ def latexify(expr):
 
 def plot_sympy(*args, ax=None, **kwargs):
     """Plot a SymPy expression into a Matplotlib plot."""
+    from matplotlib.collections import LineCollection
     if ax is None:
         ax = _plt.gca()
     for line in _sp.plot(*args, show=False, **kwargs):
@@ -142,6 +142,8 @@ def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
         ax.plot(x, y)
     ax.autoscale()
     grid_lines([0, 1], [0, 1], ax=ax)
+    if labels is None:
+        labels = args
     if labels:
         ax.legend([latexify(l) for l in labels])
     ax.set_xlabel(latexify(parameter))
