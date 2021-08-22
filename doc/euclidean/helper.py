@@ -120,12 +120,10 @@ def plot_sympy(*args, ax=None, **kwargs):
     if ax is None:
         ax = _plt.gca()
     for line in _sp.plot(*args, show=False, **kwargs):
-        # NB: line.get_points() works only for smooth plots
-        segments = line.get_segments()
-        # Dummy plot to use default color cycle
-        dummy, = ax.plot([])
-        ax.add_collection(LineCollection(segments, color=dummy.get_color()))
-        dummy.remove()
+        x, y = line.get_points()
+        # if the function is constant, SymPy only emits one value:
+        x, y = _np.broadcast_arrays(x, y)
+        ax.plot(x, y)
     ax.autoscale()
 
 
@@ -133,14 +131,7 @@ def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
     """Plot a polynomial basis (given as SymPy expressions)."""
     if ax is None:
         ax = _plt.gca()
-    # Alternatively, plot_sympy() could be used, but using LineCollection
-    # would inhibit automatic placement of the legend
-    for line in _sp.plot(*args, (parameter, 0, 1), show=False):
-        x, y = line.get_points()
-        # if the function is constant, SymPy only emits one value:
-        x, y = _np.broadcast_arrays(x, y)
-        ax.plot(x, y)
-    ax.autoscale()
+    plot_sympy(*args, (parameter, 0, 1))
     grid_lines([0, 1], [0, 1], ax=ax)
     if labels is None:
         labels = args

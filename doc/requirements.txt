@@ -2,7 +2,7 @@ insipid-sphinx-theme
 nbsphinx
 ipykernel
 NumPy
-SymPy
+SymPy>=1.9
 SciPy
 matplotlib>=2.1
 sphinxcontrib-bibtex>=2.1
