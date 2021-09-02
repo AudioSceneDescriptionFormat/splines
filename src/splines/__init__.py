@@ -101,6 +101,8 @@ class Bernstein:
     def __init__(self, segments, grid=None):
         """Piecewise Bézier curve using Bernstein basis.
 
+        See :ref:`/euclidean/bezier.ipynb`.
+
         :param segments: Sequence of segments,
             each one consisting of multiple Bézier control points.
             Different segments can have different numbers of control points
