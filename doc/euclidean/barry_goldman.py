@@ -3,17 +3,19 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 
+from helper import plot_x_3_to_6
+
 
 def lerp(xs, ts, t):
     """Linear interpolation."""
-    if not np.isscalar(t):
-        return np.array([lerp(xs, ts, t) for t in t])
-    x_begin, x_end = xs
+    x_begin, x_end = map(np.asarray, xs)
     t_begin, t_end = ts
+    if not np.isscalar(t):
+        t = np.expand_dims(t, axis=-1)
     return (x_begin * (t_end - t) + x_end * (t - t_begin)) / (t_end - t_begin)
 
 
-def animation(points, times, frames=20, interval=200, blit=True):
+def animation(points, times, frames=30, interval=200, blit=True):
     points = np.asarray(points)
     x_1, x0, x1, x2 = points
     t_1, t0, t1, t2 = times
@@ -42,7 +44,7 @@ def animation(points, times, frames=20, interval=200, blit=True):
     ax.plot(*p_10([t0, t1]).T, color=c0)
     ax.plot(*p01([t0, t1]).T, color=c0)
     ax.plot(*p12([t0, t1]).T, color=c0)
-    ax.scatter(*points.T, marker='x', c='black');
+    plot_x_3_to_6(points, ax)
     three_dots = ax.scatter([], [], color=c0)
     line_101, = ax.plot([], color=c1)
     line012, = ax.plot([], color=c1)
@@ -58,15 +60,17 @@ def animation(points, times, frames=20, interval=200, blit=True):
         p_10_v = p_10(t)
         p01_v = p01(t)
         p12_v = p12(t)
-        three_dots.set_offsets(np.row_stack([p_10_v, p01_v, p12_v]))
+        three_dots.set_offsets([p_10_v, p01_v, p12_v])
         line_101.set_data(p_101(p_10_v, p01_v, [t0, t1]).T)
         line012.set_data(p012(p01_v, p12_v, [t0, t1]).T)
         p_101_v = p_101(p_10_v, p01_v, t)
         p012_v = p012(p01_v, p12_v, t)
-        two_dots.set_offsets(np.row_stack([p_101_v, p012_v]))
-        line.set_data(x01(p_101_v, p012_v, [t0, t1]).T)
-        one_dot.set_offsets(x01(p_101_v, p012_v, t))
-        partial_curve.append(x01(p_101_v, p012_v, t))
+        two_dots_data = np.column_stack([p_101_v, p012_v])
+        two_dots.set_offsets(two_dots_data.T)
+        line.set_data(two_dots_data)
+        one_dot_data = x01(p_101_v, p012_v, t)
+        one_dot.set_offsets(one_dot_data)
+        partial_curve.append(one_dot_data)
         dots.set_data(np.array(partial_curve).T)
         return line_101, line012, line, three_dots, two_dots, one_dot, dots
 

@@ -148,3 +148,22 @@ def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
         ax.legend([latexify(l) for l in labels])
     ax.set_xlabel(latexify(parameter))
     ax.set_ylabel('weight')
+
+
+def plot_x_3_to_6(points, ax):
+    """Plot labels x3 to x6."""
+    options = dict(
+        ha="center",
+        va="center",
+        bbox=dict(
+            boxstyle='circle,pad=0.1',
+            fc=(1, 1, 1, 0.6),
+            ec='none',
+        ),
+    )
+    ax.text(*points[0], r'$\bf{x}_{3}$', **options)
+    ax.text(*points[1], r'$\bf{x}_{4}$', **options)
+    ax.text(*points[2], r'$\bf{x}_{5}$', **options)
+    ax.text(*points[3], r'$\bf{x}_{6}$', **options)
+    # Plot invisible points to make sure autoscaling doesn't crop the text
+    ax.scatter(*points.T, marker='', c='chartreuse')
