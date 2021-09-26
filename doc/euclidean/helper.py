@@ -161,9 +161,9 @@ def plot_x_3_to_6(points, ax):
             ec='none',
         ),
     )
-    ax.text(*points[0], r'$\bf{x}_{3}$', **options)
-    ax.text(*points[1], r'$\bf{x}_{4}$', **options)
-    ax.text(*points[2], r'$\bf{x}_{5}$', **options)
-    ax.text(*points[3], r'$\bf{x}_{6}$', **options)
+    ax.text(*points[0], r'$\mathbf{x}_3$', **options)
+    ax.text(*points[1], r'$\mathbf{x}_4$', **options)
+    ax.text(*points[2], r'$\mathbf{x}_5$', **options)
+    ax.text(*points[3], r'$\mathbf{x}_6$', **options)
     # Plot invisible points to make sure autoscaling doesn't crop the text
     ax.scatter(*points.T, marker='', c='chartreuse')
