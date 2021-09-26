@@ -85,6 +85,10 @@ nbsphinx_epilog = if_docname(r"""
     \textcolor{gray}{\dotfill\ {{ latex_href }} ends here.}}
 """)
 
+# Import Matplotlib to avoid this message in notebooks:
+# "Matplotlib is building the font cache; this may take a moment."
+import matplotlib.pyplot
+
 # -- Work-around to get LaTeX References at the same place as HTML --------
 
 # See https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
