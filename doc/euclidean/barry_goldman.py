@@ -15,7 +15,7 @@ def lerp(xs, ts, t):
     return (x_begin * (t_end - t) + x_end * (t - t_begin)) / (t_end - t_begin)
 
 
-def animation(points, times, frames=30, interval=200, blit=True):
+def animation(points, times, frames=30, interval=200):
     points = np.asarray(points)
     x_1, x0, x1, x2 = points
     t_1, t0, t1, t2 = times
@@ -73,9 +73,7 @@ def animation(points, times, frames=30, interval=200, blit=True):
         partial_curve.append(one_dot_data)
         dots.set_data(np.array(partial_curve).T)
         ax.set_title(f'Barry–Goldman algorithm; t = {t:1.2f}')
-        return line_101, line012, line, three_dots, two_dots, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)
 
-    return FuncAnimation(
-        fig, ani_func, frames=frames, interval=interval, blit=blit)
+    return FuncAnimation(fig, ani_func, frames=frames, interval=interval)

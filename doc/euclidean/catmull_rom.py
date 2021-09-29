@@ -15,7 +15,7 @@ def lerp(xs, ts, t):
     return (x_begin * (t_end - t) + x_end * (t - t_begin)) / (t_end - t_begin)
 
 
-def animation_2_1(points, times, frames=30, interval=200, blit=True):
+def animation_2_1(points, times, frames=30, interval=200):
     """Animation for quadratic Lagrange followed by linear blending."""
     points = np.asarray(points)
     x_1, x0, x1, x2 = points
@@ -56,15 +56,13 @@ def animation_2_1(points, times, frames=30, interval=200, blit=True):
         partial_curve.append(third_dot)
         dots.set_data(np.array(partial_curve).T)
         ax.set_title(f'quadratic Lagrange + linear blending; t = {t:1.2f}')
-        return line, two_dots, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)
 
-    return FuncAnimation(
-        fig, ani_func, frames=frames, interval=interval, blit=blit)
+    return FuncAnimation(fig, ani_func, frames=frames, interval=interval)
 
 
-def animation_1_2(points, times, frames=30, interval=200, blit=True):
+def animation_1_2(points, times, frames=30, interval=200):
     """Animation for linear interpolations followed by quadratic B-spline."""
     points = np.asarray(points)
     x_1, x0, x1, x2 = points
@@ -114,9 +112,7 @@ def animation_1_2(points, times, frames=30, interval=200, blit=True):
         dots.set_data(np.array(partial_curve).T)
         ax.set_title(
             f'linear interp./extrap. + quadratic B-spline; t = {t:1.2f}')
-        return three_dots, b_spline, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)
 
-    return FuncAnimation(
-        fig, ani_func, frames=frames, interval=interval, blit=blit)
+    return FuncAnimation(fig, ani_func, frames=frames, interval=interval)
