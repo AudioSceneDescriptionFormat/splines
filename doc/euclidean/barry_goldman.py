@@ -51,8 +51,6 @@ def animation(points, times, frames=30, interval=200):
     two_dots = ax.scatter([], [], color=c1)
     line, = ax.plot([], color=c2)
     one_dot = ax.scatter([], [], color=c2)
-    dots, = ax.plot([], '.', color='lightgrey')
-    partial_curve = []
     ax.axis('equal')
     plt.close(fig)
 
@@ -70,8 +68,7 @@ def animation(points, times, frames=30, interval=200):
         line.set_data(two_dots_data)
         one_dot_data = x01(p_101_v, p012_v, t)
         one_dot.set_offsets(one_dot_data)
-        partial_curve.append(one_dot_data)
-        dots.set_data(np.array(partial_curve).T)
+        ax.plot(*one_dot_data, '.', color='lightgrey')
         ax.set_title(f'Barry–Goldman algorithm; t = {t:1.2f}')
 
     frames = np.linspace(t0, t1, frames)

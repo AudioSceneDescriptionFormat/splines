@@ -40,8 +40,6 @@ def animation_2_1(points, times, frames=30, interval=200):
     two_dots = ax.scatter([], [], color=c0)
     line, = ax.plot([], color=c1)
     one_dot = ax.scatter([], [], color=c1)
-    dots, = ax.plot([], '.', color='lightgrey')
-    partial_curve = []
     ax.axis('equal')
     plt.close(fig)
 
@@ -53,8 +51,7 @@ def animation_2_1(points, times, frames=30, interval=200):
         two_dots.set_offsets(two_dots_data.T)
         line.set_data(two_dots_data)
         one_dot.set_offsets(third_dot)
-        partial_curve.append(third_dot)
-        dots.set_data(np.array(partial_curve).T)
+        ax.plot(*third_dot, '.', color='lightgrey')
         ax.set_title(f'quadratic Lagrange + linear blending; t = {t:1.2f}')
 
     frames = np.linspace(t0, t1, frames)
@@ -93,8 +90,6 @@ def animation_1_2(points, times, frames=30, interval=200):
     chords, = ax.plot([], linestyle='dashed', linewidth=1, color='lightgrey')
     b_spline, = ax.plot([], color=c1)
     one_dot = ax.scatter([], [], color=c1)
-    dots, = ax.plot([], '.', color='lightgrey')
-    partial_curve = []
     ax.axis('equal')
     plt.close(fig)
 
@@ -108,8 +103,7 @@ def animation_1_2(points, times, frames=30, interval=200):
         three_dots.set_offsets(three_dots_data)
         one_dot_data = de_boor(three_dots_data, t)
         one_dot.set_offsets(one_dot_data)
-        partial_curve.append(one_dot_data)
-        dots.set_data(np.array(partial_curve).T)
+        ax.plot(*one_dot_data, '.', color='lightgrey')
         ax.set_title(
             f'linear interp./extrap. + quadratic B-spline; t = {t:1.2f}')
 
