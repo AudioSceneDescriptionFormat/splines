@@ -55,6 +55,7 @@ def animation_2_1(points, times, frames=30, interval=200, blit=True):
         one_dot.set_offsets(third_dot)
         partial_curve.append(third_dot)
         dots.set_data(np.array(partial_curve).T)
+        ax.set_title(f'quadratic Lagrange + linear blending; t = {t:1.2f}')
         return line, two_dots, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)
@@ -111,6 +112,8 @@ def animation_1_2(points, times, frames=30, interval=200, blit=True):
         one_dot.set_offsets(one_dot_data)
         partial_curve.append(one_dot_data)
         dots.set_data(np.array(partial_curve).T)
+        ax.set_title(
+            f'linear interp./extrap. + quadratic B-spline; t = {t:1.2f}')
         return three_dots, b_spline, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)

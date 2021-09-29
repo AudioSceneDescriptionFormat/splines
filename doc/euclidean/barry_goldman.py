@@ -72,6 +72,7 @@ def animation(points, times, frames=30, interval=200, blit=True):
         one_dot.set_offsets(one_dot_data)
         partial_curve.append(one_dot_data)
         dots.set_data(np.array(partial_curve).T)
+        ax.set_title(f'Barry–Goldman algorithm; t = {t:1.2f}')
         return line_101, line012, line, three_dots, two_dots, one_dot, dots
 
     frames = np.linspace(t0, t1, frames)
