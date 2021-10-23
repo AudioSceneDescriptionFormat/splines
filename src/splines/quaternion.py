@@ -10,6 +10,10 @@ class Quaternion:
 
     This is the base class for the more relevant `UnitQuaternion` class.
 
+    See the `notebook about quaternions`__.
+
+    __ ../rotation/quaternions.ipynb
+
     """
 
     __slots__ = '_scalar', '_vector'
@@ -23,10 +27,12 @@ class Quaternion:
 
     @property
     def scalar(self):
+        """The scalar part (a.k.a. real part) of the quaternion."""
         return self._scalar
 
     @property
     def vector(self):
+        """The vector part (a.k.a. imaginary part) of the quaternion."""
         return self._vector
 
     def __repr__(self):
@@ -57,7 +63,8 @@ class Quaternion:
             vector=(s_x - o_x, s_y - o_y, s_z - o_z))
 
     def __mul__(self, other):
-        if isinstance(self, UnitQuaternion) and isinstance(other, UnitQuaternion):
+        if isinstance(self, UnitQuaternion) and \
+                isinstance(other, UnitQuaternion):
             result_type = UnitQuaternion
         elif isinstance(other, Quaternion):
             result_type = Quaternion
@@ -90,10 +97,12 @@ class Quaternion:
         return Quaternion.__new__(type(self), -self.scalar, (-x, -y, -z))
 
     def conjugate(self):
+        """Return quaternion with same `scalar` part, negated `vector` part."""
         x, y, z = self.vector
         return Quaternion.__new__(type(self), self.scalar, (-x, -y, -z))
 
     def normalize(self):
+        """Return quaternion with same 4D direction but unit `norm`."""
         norm = self.norm
         x, y, z, w = self.xyzw
         return UnitQuaternion.from_unit_xyzw(
@@ -107,7 +116,7 @@ class Quaternion:
 
         Note that this is different from the quaternion multiplication
         (``q1 * q2``), which produces another quaternion
-        (and is non-commutative).
+        (and is noncommutative).
 
         """
         # NB: math.prod() is available since Python 3.8
@@ -116,22 +125,31 @@ class Quaternion:
 
     @property
     def norm(self):
+        """Length of the quaternion in 4D space."""
         x, y, z, w = self.xyzw
         return _math.sqrt(x**2 + y**2 + z**2 + w**2)
 
     @property
     def xyzw(self):
+        """Components of the quaternion, `scalar` last."""
         x, y, z = self.vector
         return x, y, z, self.scalar
 
     @property
     def wxyz(self):
+        """Components of the quaternion, `scalar` first."""
         x, y, z = self.vector
         return self.scalar, x, y, z
 
 
 class UnitQuaternion(Quaternion):
-    """Unit quaternion."""
+    """Unit quaternion.
+
+    See the `section about unit quaternions`__.
+
+    __ ../rotation/quaternions.ipynb#Unit-Quaternions
+
+    """
 
     __slots__ = ()
 
@@ -140,7 +158,7 @@ class UnitQuaternion(Quaternion):
 
     @classmethod
     def from_axis_angle(cls, axis, angle):
-        """Create a unit quaternion from a rotation axis and angle.
+        """Create a unit quaternion from a rotation `axis` and `angle`.
 
         :param axis: Three-component rotation axis. This will be normalized.
         :param angle: Rotation angle in radians.
@@ -155,7 +173,7 @@ class UnitQuaternion(Quaternion):
     def from_unit_xyzw(cls, xyzw):
         """Create a unit quaternion from another unit quaternion.
 
-        :param xyzw: Components of a unit quaternion (scalar last).
+        :param xyzw: Components of a unit quaternion (`scalar` last).
             This will *not* be normalized, it must already have unit length.
 
         """
@@ -178,13 +196,12 @@ class UnitQuaternion(Quaternion):
 
     @classmethod
     def exp_map(cls, value):
-        """Exponential map from :math:`R^3` to quaternions.
+        """Exponential map from :math:`R^3` to unit quaternions.
 
         This is the inverse operation to `log_map()`.
 
         :param value: Element of the tangent space at the quaternion identity.
-        :param type: 3-tuple
-        :returns: Corresponding unit quaternion.
+        :type value: 3-tuple
 
         """
         x, y, z = value
@@ -196,7 +213,7 @@ class UnitQuaternion(Quaternion):
         return super().__new__(cls, _math.cos(norm), (s * x, s * y, s * z))
 
     def log_map(self):
-        """Logarithmic map from quaternions to :math:`R^3`.
+        """Logarithmic map from unit quaternions to :math:`R^3`.
 
         :returns: Corresponding vector in the tangent space at the
             quaternion identity.
@@ -209,6 +226,7 @@ class UnitQuaternion(Quaternion):
 
     @property
     def axis(self):
+        """The rotation axis."""
         assert self.scalar <= 1
         # NB: This is the same as sqrt(x**2 + y**2 + z**2)
         norm = _math.sqrt(1 - self.scalar**2)
@@ -216,6 +234,7 @@ class UnitQuaternion(Quaternion):
 
     @property
     def angle(self):
+        """The rotation angle in radians."""
         return 2 * _math.acos(self.scalar)
 
     def rotation_to(self, other):
@@ -223,10 +242,21 @@ class UnitQuaternion(Quaternion):
 
         See :ref:`/rotation/quaternions.ipynb#Relative-Rotation-(Global-Frame-of-Reference)`.
 
+        :param other: Target rotation.
+        :type other: UnitQuaternion
+
+        :returns: Relative rotation (as `UnitQuaternion`).
+
         """
         return other * self.inverse()
 
     def rotate_vector(self, v):
+        """Apply rotation to a 3D vector.
+
+        :param v: A vector in :math:`R^3`.
+        :type v: 3-tuple
+
+        """
         rotated = self * Quaternion(0, v) * self.inverse()
         return rotated.vector
 
