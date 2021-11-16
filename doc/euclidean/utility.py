@@ -1,6 +1,4 @@
-from collections import Mapping
 import sympy as sp
-from sympy.core.containers import Dict
 
 
 # https://github.com/sympy/sympy/issues/4986
