@@ -101,7 +101,7 @@ class Quaternion:
         x, y, z = self.vector
         return Quaternion.__new__(type(self), self.scalar, (-x, -y, -z))
 
-    def normalize(self):
+    def normalized(self):
         """Return quaternion with same 4D direction but unit `norm`."""
         norm = self.norm
         x, y, z, w = self.xyzw
