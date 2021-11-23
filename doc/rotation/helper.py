@@ -141,7 +141,7 @@ def prepare_figure(titles='', figsize=None, **kwargs):
     collections = []
     for ax, title in zip(axs, titles):
         collections.append(prepare_axes(ax))
-        ax.set_title(title)
+        ax.set_title(title, y=0, pad=-10)
     return collections
 
 
@@ -167,7 +167,7 @@ def plot_rotations(rotations, *, figsize=None, ls=None):
     if ls is None:
         ls = LightSource()
     for [ax], [title, rotations] in zip(axs, rotations.items()):
-        ax.set_title(title)
+        ax.set_title(title, y=0, pad=-6)
         object_width = 12
         shift_x = object_width
         _, _, x1, y1 = ax.bbox.bounds
