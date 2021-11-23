@@ -125,13 +125,18 @@ def plot_rotation(rot, figsize=None, ls=None):
     return collections
 
 
-def prepare_figure(titles='', **kwargs):
+def prepare_figure(titles='', figsize=None, **kwargs):
     if isinstance(titles, str):
         titles = [titles]
+    N = len(titles)
+    if figsize is None:
+        # This comfortably allows 4 rotations at once:
+        figsize = 1.8 + (N - 1) * 2.2, 1.8
     fig, (axs,) = plt.subplots(
-        ncols=len(titles),
+        ncols=N,
         squeeze=False,
         subplot_kw=dict(projection='dumb3d'),
+        figsize=figsize,
         **kwargs)
     collections = []
     for ax, title in zip(axs, titles):
