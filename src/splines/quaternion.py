@@ -226,7 +226,7 @@ class UnitQuaternion(Quaternion):
 
     @property
     def axis(self):
-        """The rotation axis."""
+        """The (normalized) rotation axis."""
         assert self.scalar <= 1
         # NB: This is the same as sqrt(x**2 + y**2 + z**2)
         norm = _math.sqrt(1 - self.scalar**2)
@@ -257,6 +257,7 @@ class UnitQuaternion(Quaternion):
 
         :param v: A vector in :math:`R^3`.
         :type v: 3-tuple
+        :returns: The rotated vector.
 
         """
         rotated = self * Quaternion(0, v) * self.inverse()
@@ -264,7 +265,7 @@ class UnitQuaternion(Quaternion):
 
 
 def slerp(one, two, t):
-    """Spherical linear interpolation.
+    """Spherical Linear intERPolation.
 
     See :ref:`/rotation/slerp.ipynb`.
 
@@ -277,7 +278,7 @@ def slerp(one, two, t):
 
 
 def canonicalized(quaternions):
-    """Iterator adapter to ensure minimal angles between quaternions."""
+    """Iterator adapter to ensure minimal angles between *quaternions*."""
     p = UnitQuaternion.from_unit_xyzw((0, 0, 0, 1))
     for q in quaternions:
         if p.dot(q) < 0:
@@ -394,7 +395,7 @@ class DeCasteljau:
 
 
 def _reduce_de_casteljau(segment, t):
-    """Obtain two quaternions for the last step of De Castelau's algorithm.
+    """Obtain two quaternions for the last step of De Casteljau's algorithm.
 
     Repeatedly applies `slerp()` to neighboring control quaternions
     until only two are left.
