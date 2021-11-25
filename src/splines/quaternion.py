@@ -230,7 +230,9 @@ class UnitQuaternion(Quaternion):
         assert self.scalar <= 1
         # NB: This is the same as sqrt(x**2 + y**2 + z**2)
         norm = _math.sqrt(1 - self.scalar**2)
-        return _np.true_divide(self.vector, norm)
+        # Avoid warning for (1, (0, 0, 0)) -> (NaN, NaN, NaN):
+        with _np.errstate(invalid='ignore'):
+            return _np.true_divide(self.vector, norm)
 
     @property
     def angle(self):
