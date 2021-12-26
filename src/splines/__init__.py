@@ -306,8 +306,9 @@ class CatmullRom(CubicHermite):
         t_1, t0, t1 = times
         delta_1 = t0 - t_1
         delta0 = t1 - t0
-        return ((delta0**2 * (x0 - x_1) + delta_1**2 * (x1 - x0)) /
-                (delta0 * delta_1 * (delta0 + delta_1)))
+        v_1 = (x0 - x_1) / delta_1
+        v0 = (x1 - x0) / delta0
+        return (delta0 * v_1 + delta_1 * v0) / (delta0 + delta_1)
 
     def __init__(self, vertices, grid=None, *, alpha=None,
                  endconditions='natural'):
@@ -368,16 +369,12 @@ class KochanekBartels(CubicHermite):
         b = (1 - T) * (1 - C) * (1 - B)
         c = (1 - T) * (1 - C) * (1 + B)
         d = (1 - T) * (1 + C) * (1 - B)
-        incoming = (
-            c * (t1 - t0)**2 * (x0 - x_1) + d * (t0 - t_1)**2 * (x1 - x0)
-        ) / (
-            (t1 - t0) * (t0 - t_1) * (t1 - t_1)
-        )
-        outgoing = (
-            a * (t1 - t0)**2 * (x0 - x_1) + b * (t0 - t_1)**2 * (x1 - x0)
-        ) / (
-            (t1 - t0) * (t0 - t_1) * (t1 - t_1)
-        )
+        delta_1 = t0 - t_1
+        delta0 = t1 - t0
+        v_1 = (x0 - x_1) / delta_1
+        v0 = (x1 - x0) / delta0
+        incoming = (c * delta0 * v_1 + d * delta_1 * v0) / (delta_1 + delta0)
+        outgoing = (a * delta0 * v_1 + b * delta_1 * v0) / (delta_1 + delta0)
         return incoming, outgoing
 
     def __init__(self, vertices, grid=None, *, tcb=(0, 0, 0), alpha=None,
