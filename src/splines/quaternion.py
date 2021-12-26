@@ -425,23 +425,27 @@ class KochanekBartels(DeCasteljau):
 
         q_in = q0 * q_1.inverse()
         q_out = q1 * q0.inverse()
-        v_in = q_in.log_map() / (t0 - t_1)
-        v_out = q_out.log_map() / (t1 - t0)
+        rho_in = q_in.log_map() / (t0 - t_1)
+        rho_out = q_out.log_map() / (t1 - t0)
 
-        def v0(weight_in, weight_out):
+        def omega(weight_in, weight_out):
             return (
-                weight_in * (t1 - t0) * v_in +
-                weight_out * (t0 - t_1) * v_out
+                weight_in * (t1 - t0) * rho_in +
+                weight_out * (t0 - t_1) * rho_out
             ) / (t1 - t_1)
 
         return [
-            UnitQuaternion.exp_map(-v0(c, d) * (t0 - t_1) / 3) * q0,
-            UnitQuaternion.exp_map(v0(a, b) * (t1 - t0) / 3) * q0,
+            UnitQuaternion.exp_map(-omega(c, d) * (t0 - t_1) / 3) * q0,
+            UnitQuaternion.exp_map(omega(a, b) * (t1 - t0) / 3) * q0,
         ]
 
     def __init__(self, quaternions, grid=None, *, tcb=(0, 0, 0), alpha=None,
                  endconditions='natural'):
         """Kochanek--Bartels-like rotation spline.
+
+        See `the corresponding notebook`__ for details.
+
+        __ ../rotation/kochanek-bartels.ipynb
 
         :param quaternions: Sequence of rotations to be interpolated.
             The quaternions will be `canonicalized()`.
