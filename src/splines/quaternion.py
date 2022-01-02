@@ -599,7 +599,8 @@ def _check_endconditions(endconditions, quaternions, grid):
 
 def _end_control_quaternion(condition, quaternions):
     if condition == 'natural':
-        return _natural_control_quaternion(quaternions)
+        first, _, third = quaternions
+        return _natural_control_quaternion(first, third)
     elif _np.shape(condition) == _np.shape(quaternions[0]):
         #tangent = condition
         raise NotImplementedError('TODO')
@@ -607,13 +608,18 @@ def _end_control_quaternion(condition, quaternions):
         f'{condition!r} is not a valid start/end condition')
 
 
-def _natural_control_quaternion(quaternions):
-    """Return second control quaternion given the other three."""
-    outer, inner_control, inner = quaternions
-    return (
-        (inner_control * inner.inverse()) *
-        (inner * outer.inverse())
-    )**(1 / 2) * outer
+def _natural_control_quaternion(first, third):
+    """Natural end condition for "cubic" Bézier curves.
+
+    Returns the second control quaternion given the first and the third.
+
+    This can also be used for the end of the spline,
+    when counting the control quaternions from the end.
+
+    See rotation/end-conditions-natural.ipynb.
+
+    """
+    return first.rotation_to(third)**(1 / 2) * first
 
 
 class BarryGoldman:
