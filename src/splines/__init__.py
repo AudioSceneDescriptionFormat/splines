@@ -237,13 +237,13 @@ def _natural_tangent(vertices, times, tangent):
     Given 2 points and one tangent, this returns the tangent for the
     other side that results from the second derivative being zero.
 
-    See :ref:`end-conditions-natural.ipynb`.
+    See euclidan/end-conditions-natural.ipynb.
 
     """
     x0, x1 = _np.asarray(vertices)
     t0, t1 = times
     delta = t1 - t0
-    return (3 * x1 - 3 * x0 - delta * tangent) / (2 * delta)
+    return 3 * (x1 - x0) / (2 * delta) - tangent / 2
 
 
 class CubicHermite(Monomial):
