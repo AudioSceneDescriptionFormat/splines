@@ -40,6 +40,10 @@ linkcheck_ignore = [
     'https://github.com/scipy/scipy/blob/',
 ]
 
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+]
+
 
 def if_docname(text):
     return r"""
