@@ -4,14 +4,14 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Install pandoc
         run: |
           sudo apt-get install --no-install-recommends pandoc
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
       - name: Double-check Python version
@@ -27,7 +27,7 @@ jobs:
         run: |
           python3 -m sphinx -W --keep-going --color doc/ _build/html/ -d _build/doctrees/ -b html
       - name: Upload HTML
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: HTML
           path: _build/html/
@@ -40,7 +40,7 @@ jobs:
           working_directory: _build/latex
           root_file: splines.tex
       - name: Upload PDF
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PDF
           path: _build/latex/splines.pdf
@@ -48,7 +48,7 @@ jobs:
         run: |
           python3 -m sphinx -W --keep-going --color doc/ _build/linkcheck/ -d _build/doctrees/ -b linkcheck
       - name: Upload linkcheck results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: ${{ success() || failure() }}
         with:
           name: linkcheck
