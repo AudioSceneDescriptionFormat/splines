@@ -130,9 +130,14 @@ class Bernstein:
         t = (t - t0) / (t1 - t0)
         control_points = self.segments[idx]
         degree = len(control_points) - 1
-        return sum(
-            a * b
-            for a, b in zip(control_points, self.basis(degree, t)))
+        basis = self.basis(degree, t)
+        return _dotproduct(control_points, basis)
+
+
+def _dotproduct(vec1, vec2):
+    # See https://docs.python.org/3/library/itertools.html#itertools-recipes
+    import operator
+    return sum(map(operator.mul, vec1, vec2))
 
 
 def _check_param(name, param, grid):

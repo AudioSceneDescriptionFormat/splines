@@ -223,3 +223,16 @@ def _inverse(expr):
     elif isinstance(expr, sp.MatrixExpr):
         return expr.inverse()
     raise TypeError('Unable to invert')
+
+
+# This is unrelated to the above, and it probably should be moved.
+def dotproduct(vec1, vec2):
+    """Dot product of two iterables.
+
+    Stops when the shorter one is exhausted.
+
+    See https://docs.python.org/3/library/itertools.html#itertools-recipes
+
+    """
+    import operator
+    return sum(map(operator.mul, vec1, vec2))

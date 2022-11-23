@@ -2,7 +2,7 @@
 import math as _math
 
 import numpy as _np
-from . import _check_param
+from . import _check_param, _dotproduct
 
 
 class Quaternion:
@@ -119,9 +119,7 @@ class Quaternion:
         (and is noncommutative).
 
         """
-        # NB: math.prod() is available since Python 3.8
-        prod = _np.multiply.reduce
-        return sum(map(prod, zip(self.xyzw, other.xyzw)))
+        return _dotproduct(self.xyzw, other.xyzw)
 
     @property
     def norm(self):
