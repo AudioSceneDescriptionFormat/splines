@@ -277,7 +277,7 @@ def slerp(one, two, t):
 
 def canonicalized(quaternions):
     """Iterator adapter to ensure minimal angles between *quaternions*."""
-    p = UnitQuaternion.from_unit_xyzw((0, 0, 0, 1))
+    p = UnitQuaternion()
     for q in quaternions:
         if p.dot(q) < 0:
             q = -q
