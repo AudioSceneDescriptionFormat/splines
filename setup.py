@@ -17,7 +17,7 @@ setup(
     description='Splines in Euclidean Space and Beyond',
     long_description=open('README.rst').read(),
     install_requires=['NumPy'],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     license='MIT',
     keywords='splines curves interpolation quaternions'.split(),
     project_urls={
