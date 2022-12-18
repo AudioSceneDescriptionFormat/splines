@@ -1,5 +1,4 @@
 """Helper functions for plotting rotations."""
-from functools import partial
 from math import radians, degrees, atan2, asin
 
 import matplotlib
@@ -12,9 +11,14 @@ import numpy as np
 
 from splines.quaternion import UnitQuaternion
 
-
-shade_colors = partial(Axes3D._shade_colors, 'dummy')
-generate_normals = partial(Axes3D._generate_normals, 'dummy')
+try:
+    # The helper functions have been moved in Matplotlib 3.7.0,
+    # see https://github.com/matplotlib/matplotlib/pull/23914
+    from mpl_toolkits.mplot3d.art3d import _shade_colors, _generate_normals
+except ImportError:
+    from functools import partial
+    _shade_colors = partial(Axes3D._shade_colors, 'dummy')
+    _generate_normals = partial(Axes3D._generate_normals, 'dummy')
 
 
 def faces():
@@ -82,7 +86,7 @@ def create_polys(rot, *, ls=None):
     if ls is None:
         ls = LightSource()
     color = 'white'
-    facecolors = shade_colors(color, generate_normals(polys), ls)
+    facecolors = _shade_colors(color, _generate_normals(polys), ls)
     return polys, facecolors
 
 
