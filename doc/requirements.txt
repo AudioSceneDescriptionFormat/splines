@@ -1,5 +1,6 @@
 insipid-sphinx-theme
 nbsphinx
+ipython!=8.7.0  # see https://github.com/spatialaudio/nbsphinx/issues/687
 ipykernel
 NumPy
 SymPy>=1.9
