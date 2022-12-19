@@ -644,17 +644,13 @@ class BarryGoldman:
         q0, q1 = self.quaternions[idx:idx + 2]
         t0, t1 = self.grid[idx:idx + 2]
         if idx == 0:
-            q_1 = self.quaternions[-2]
-            if q_1.dot(q0) < 0:
-                q_1 = -q_1
+            q_1 = _cycle_prefix(self.quaternions)
             t_1 = t0 - (self.grid[-1] - self.grid[-2])
         else:
             q_1 = self.quaternions[idx - 1]
             t_1 = self.grid[idx - 1]
         if idx + 2 == len(self.quaternions):
-            q2 = self.quaternions[1]
-            if q1.dot(q2) < 0:
-                q2 = -q2
+            q2 = _cycle_suffix(self.quaternions)
             assert len(self.quaternions) == len(self.grid)
             t2 = t1 + (self.grid[1] - self.grid[0])
         else:
@@ -671,3 +667,56 @@ class BarryGoldman:
                 slerp(q1, q2, (t - t1) / (t2 - t1)),
                 (t - t0) / (t2 - t0)),
             (t - t0) / (t1 - t0))
+
+
+def _cycle_prefix(quaternions):
+    prefix = quaternions[-2]
+    if prefix.dot(quaternions[0]) < 0:
+        prefix = -prefix
+    return prefix
+
+
+def _cycle_suffix(quaternions):
+    suffix = quaternions[1]
+    if quaternions[-1].dot(suffix) < 0:
+        suffix = -suffix
+    return suffix
+
+
+class Squad:
+    """Spherical Quadrangle Interpolation, see __init__()."""
+
+    def __init__(self, quaternions):
+        """Spherical Quadrangle Interpolation.
+
+        Only a uniform implementation is available.
+
+        Always closed (for now).
+
+        See :ref:`/rotation/squad.ipynb`.
+
+        """
+        self.quaternions = _check_quaternions(quaternions, closed=True)
+        self.grid = list(range(len(self.quaternions)))
+        qs = (
+            _cycle_prefix(self.quaternions),
+            *self.quaternions,
+            _cycle_suffix(self.quaternions),
+        )
+        self.inner_quadrangle_points = []
+        for q_1, q0, q1 in zip(qs, qs[1:], qs[2:]):
+            inv = q0.inverse()
+            s = q0 * UnitQuaternion.exp_map(
+                ((inv * q1).log_map() + (inv * q_1).log_map()) / -4)
+            self.inner_quadrangle_points.append(s)
+
+
+    def evaluate(self, t):
+        if not _np.isscalar(t):
+            return _np.array([self.evaluate(t) for t in t])
+        idx = _check_param('t', t, self.grid)
+        q0, q1 = self.quaternions[idx:idx + 2]
+        s0, s1 = self.inner_quadrangle_points[idx:idx + 2]
+        t0 = self.grid[idx]
+        t = t - t0
+        return slerp(slerp(q0, q1, t), slerp(s0, s1, t), 2 * t * (1 - t))
