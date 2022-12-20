@@ -645,14 +645,14 @@ class BarryGoldman:
         t0, t1 = self.grid[idx:idx + 2]
         if idx == 0:
             q_1 = _cycle_prefix(self.quaternions)
-            t_1 = t0 - (self.grid[-1] - self.grid[-2])
+            t_1 = _cycle_prefix_t(self.grid)
         else:
             q_1 = self.quaternions[idx - 1]
             t_1 = self.grid[idx - 1]
         if idx + 2 == len(self.quaternions):
             q2 = _cycle_suffix(self.quaternions)
             assert len(self.quaternions) == len(self.grid)
-            t2 = t1 + (self.grid[1] - self.grid[0])
+            t2 = _cycle_suffix_t(self.grid)
         else:
             q2 = self.quaternions[idx + 2]
             t2 = self.grid[idx + 2]
@@ -676,6 +676,10 @@ def _cycle_prefix(quaternions):
     return prefix
 
 
+def _cycle_prefix_t(grid):
+    return grid[0] - (grid[-1] - grid[-2])
+
+
 def _cycle_suffix(quaternions):
     suffix = quaternions[1]
     if quaternions[-1].dot(suffix) < 0:
@@ -683,13 +687,15 @@ def _cycle_suffix(quaternions):
     return suffix
 
 
+def _cycle_suffix_t(grid):
+    return grid[-1] + (grid[1] - grid[0])
+
+
 class Squad:
     """Spherical Quadrangle Interpolation, see __init__()."""
 
-    def __init__(self, quaternions):
+    def __init__(self, quaternions, grid=None, *, alpha=None):
         """Spherical Quadrangle Interpolation.
-
-        Only a uniform implementation is available.
 
         Always closed (for now).
 
@@ -697,26 +703,48 @@ class Squad:
 
         """
         self.quaternions = _check_quaternions(quaternions, closed=True)
-        self.grid = list(range(len(self.quaternions)))
+        self.grid = list(_check_grid(grid, alpha, self.quaternions))
         qs = (
             _cycle_prefix(self.quaternions),
             *self.quaternions,
             _cycle_suffix(self.quaternions),
         )
-        self.inner_quadrangle_points = [
-            UnitQuaternion.exp_map(
-                -(q0.rotation_to(q1).log_map() + q0.rotation_to(q_1).log_map())
-                / 4
-            ) * q0
-            for q_1, q0, q1 in zip(qs, qs[1:], qs[2:])
+        ts = (
+            _cycle_prefix_t(self.grid),
+            *self.grid,
+            _cycle_suffix_t(self.grid),
+        )
+        control_points = []
+
+        triples = [zip(arg, arg[1:], arg[2:]) for arg in (qs, ts)]
+        for (q_1, q0, q1), (t_1, t0, t1) in zip(*triples):
+            control_points.extend([
+                UnitQuaternion.exp_map(
+                    - (t1 - t0) / (2 * (t1 - t_1)) * (
+                        q0.rotation_to(q1).log_map() +
+                        (t1 - t0) * q0.rotation_to(q_1).log_map() / (t0 - t_1)
+                    )
+                ) * q0,
+                q0,
+                q0,
+                UnitQuaternion.exp_map(
+                    - (t0 - t_1) / (2 * (t1 - t_1)) * (
+                        (t0 - t_1) * q0.rotation_to(q1).log_map() / (t1 - t0) +
+                        q0.rotation_to(q_1).log_map()
+                    )
+                ) * q0,
+            ])
+        del control_points[:2]
+        self.segments = [
+            control_points[i:i + 4]
+            for i in range(0, len(control_points), 4)
         ]
 
     def evaluate(self, t):
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t) for t in t])
         idx = _check_param('t', t, self.grid)
-        q0, q1 = self.quaternions[idx:idx + 2]
-        s0, s1 = self.inner_quadrangle_points[idx:idx + 2]
-        t0 = self.grid[idx]
-        t = t - t0
+        q0, s0, s1, q1 = self.segments[idx]
+        t0, t1 = self.grid[idx:idx + 2]
+        t = (t - t0) / (t1 - t0)
         return slerp(slerp(q0, q1, t), slerp(s0, s1, t), 2 * t * (1 - t))
