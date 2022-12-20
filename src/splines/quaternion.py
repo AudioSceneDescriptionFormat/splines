@@ -703,13 +703,13 @@ class Squad:
             *self.quaternions,
             _cycle_suffix(self.quaternions),
         )
-        self.inner_quadrangle_points = []
-        for q_1, q0, q1 in zip(qs, qs[1:], qs[2:]):
-            inv = q0.inverse()
-            s = q0 * UnitQuaternion.exp_map(
-                ((inv * q1).log_map() + (inv * q_1).log_map()) / -4)
-            self.inner_quadrangle_points.append(s)
-
+        self.inner_quadrangle_points = [
+            UnitQuaternion.exp_map(
+                -(q0.rotation_to(q1).log_map() + q0.rotation_to(q_1).log_map())
+                / 4
+            ) * q0
+            for q_1, q0, q1 in zip(qs, qs[1:], qs[2:])
+        ]
 
     def evaluate(self, t):
         if not _np.isscalar(t):
