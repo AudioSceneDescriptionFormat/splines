@@ -38,6 +38,8 @@ default_role = 'any'
 linkcheck_ignore = [
     # Anchors with line numbers don't seem to work with linkcheck builder
     'https://github.com/scipy/scipy/blob/',
+    # The idea of DOIs is that they are kept valid, so why check them at all?
+    'https://doi.org/',
 ]
 
 nbsphinx_execute_arguments = [
