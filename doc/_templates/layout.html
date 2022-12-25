@@ -1,0 +1,27 @@
+{% extends "!layout.html" %}
+
+{% block comments %}
+{% if sourcename is defined %}
+<script src="https://utteranc.es/client.js"
+        repo="AudioSceneDescriptionFormat/splines"
+{#-
+Github's issue search is somewhat fuzzy, but we would like an exact match for issue-term.
+Spaces, commas, hyphens, slashes etc. would be treated as search term separators,
+which might lead to the wrong comments being included.  Therefore, we are replacing
+some characters with underscores, and "urlencode" will take care of the rest.
+#}
+        issue-term="comments:{{ pagename
+            |replace(' ', '_')
+            |replace(',', '_')
+            |replace('-', '_')
+            |replace('~', '_')
+            |replace('/', '_')
+            |urlencode
+        }}"
+        label="comments"
+        theme="preferred-color-scheme"
+        crossorigin="anonymous"
+        async>
+</script>
+{% endif %}
+{% endblock %}

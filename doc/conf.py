@@ -100,6 +100,8 @@ nbsphinx_epilog = if_docname(r"""
 # "Matplotlib is building the font cache; this may take a moment."
 import matplotlib.pyplot
 
+templates_path = ['_templates']
+
 # -- Work-around to get LaTeX References at the same place as HTML --------
 
 # See https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
