@@ -181,7 +181,7 @@ class UnitQuaternion(Quaternion):
     def __pow__(self, alpha):
         if not _np.isscalar(alpha):
             return _np.array([self.__pow__(a) for a in alpha])
-        if self.scalar >= 1:
+        if abs(self.scalar) >= 1:
             return super().__new__(UnitQuaternion, self.scalar, self.vector)
         return UnitQuaternion.exp_map(alpha * self.log_map())
 
