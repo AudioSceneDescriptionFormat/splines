@@ -11,7 +11,7 @@ Online documentation
     https://splines.readthedocs.io/
 
 Documentation notebooks on Binder
-    https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/master?filepath=doc/index.ipynb
+    https://mybinder.org/v2/gh/AudioSceneDescriptionFormat/splines/master?labpath=doc/index.ipynb
 
 Source code repository (and issue tracker)
     https://github.com/AudioSceneDescriptionFormat/splines
