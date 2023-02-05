@@ -663,7 +663,10 @@ class PiecewiseMonotoneCubic(CatmullRom):
 class MonotoneCubic(PiecewiseMonotoneCubic):
     """Monotone cubic curve, see __init__()."""
 
-    def __init__(self, values, *args, **kwargs):
+    def __init__(
+            self, values, grid=None, slopes=None, *,
+            alpha=None, cyclic=False,
+            **kwargs):
         """Monotone cubic curve.
 
         This takes the same arguments as `PiecewiseMonotoneCubic`
@@ -675,7 +678,29 @@ class MonotoneCubic(PiecewiseMonotoneCubic):
         """
         if 'closed' in kwargs:
             raise TypeError('The "closed" argument is not allowed')
-        PiecewiseMonotoneCubic.__init__(self, values, *args, **kwargs)
+
+        grid = _check_grid(grid, alpha, values)
+        if cyclic:
+            if slopes is None:
+                slopes = [None] * len(values)
+            if (slopes[0], slopes[-1]) != (None, None):
+                raise ValueError(
+                    'If "cyclic", the first and last slope must be None')
+            temp_values = (
+                values[-2],
+                values[-1],
+                values[-1] + (values[1] - values[0]))
+            temp_grid = (
+                grid[-2],
+                grid[-1],
+                grid[-1] + (grid[1] - grid[0]))
+            temp_spline = PiecewiseMonotoneCubic(temp_values, grid=temp_grid)
+            cyclic_slope = temp_spline.evaluate(temp_grid[1], 1)
+            slopes[0] = cyclic_slope
+            slopes[-1] = cyclic_slope
+
+        # NB: "alpha" has already been applied, we don't have to pass it on:
+        PiecewiseMonotoneCubic.__init__(self, values, grid, slopes, **kwargs)
         diffs = _np.diff(values)
         if not (all(diffs >= 0) or all(diffs <= 0)):
             raise ValueError('Only monotone values are allowed')
