@@ -670,8 +670,8 @@ class MonotoneCubic(PiecewiseMonotoneCubic):
         """Monotone cubic curve.
 
         This takes the same arguments as `PiecewiseMonotoneCubic`
-        (except ``closed``), but it raises an error if the given values
-        are not montone.
+        (except ``closed`` is replaced by ``cyclic``),
+        but it raises an error if the given values are not montone.
 
         See :ref:`/euclidean/piecewise-monotone.ipynb#Monotone-Interpolation`.
 
@@ -816,7 +816,7 @@ class UnitSpeedAdapter:
 class NewGridAdapter:
     """Re-parameterize a spline with new grid values, see __init__()."""
 
-    def __init__(self, curve, new_grid=1):
+    def __init__(self, curve, new_grid=1, cyclic=False):
         """Re-parameterize a spline with new grid values.
 
         :param curve: A spline.
@@ -827,6 +827,10 @@ class NewGridAdapter:
             value automatically.
             The first and last value cannot be ``None``.
         :type new_grid: optional
+        :param cyclic: If ``True``, the slope of the re-parameterization
+            function (but not necessarily the speed of the final spline!)
+            will be the same at the beginning and end of the spline.
+        :type cyclic: optional
 
         """
         if _np.isscalar(new_grid):
@@ -842,7 +846,8 @@ class NewGridAdapter:
                 continue
             new_values.append(new)
             old_values.append(old)
-        self._new2old = MonotoneCubic1D(old_values, grid=new_values)
+        self._new2old = MonotoneCubic(
+            old_values, grid=new_values, cyclic=cyclic)
         self.grid = []
         for old, new in zip(curve.grid, new_grid):
             if new is None:
