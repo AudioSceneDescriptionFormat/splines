@@ -5,7 +5,7 @@ Splines in Euclidean Space and Beyond
 in one, two and three spatial dimensions, as well as rotation splines.
 
 Installation
-    ``python3 -m pip install splines``
+    ``python -m pip install splines``
 
 Online documentation
     https://splines.readthedocs.io/
