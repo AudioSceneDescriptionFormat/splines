@@ -161,7 +161,7 @@ control points
     and additional values that are not points at all.
     We call them *control values*.
     For example, `Hermite`_ splines pass through a set of control points,
-    but they need additional information about the tangents
+    but they need additional information about the tangent vectors
     (i.e. the first derivatives) at the transitions between segments.
     For higher-order splines they also need the second and higher derivatives.
 
@@ -261,7 +261,7 @@ type            local control continuity  interpolating
 =============== ============= =========== =============
 `Catmull--Rom`_ yes           :math:`C^1` yes
 natural_        no            :math:`C^2` yes
-B-Splines       yes           :math:`C^2` no
+B-splines_      yes           :math:`C^2` no
 =============== ============= =========== =============
 
 .. _Hermite: hermite.ipynb
@@ -269,6 +269,7 @@ B-Splines       yes           :math:`C^2` no
 .. _Catmull--Rom: catmull-rom.ipynb
 .. _natural: natural.ipynb
 .. _Kochanek--Bartels: kochanek-bartels.ipynb
+.. _B-splines: https://en.wikipedia.org/wiki/B-spline
 
 `Kochanek--Bartels`_ splines with :math:`C = 0`
 are in the same category as Catmull--Rom splines
