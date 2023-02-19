@@ -216,7 +216,7 @@ degree
     might use the term *order*, which is one more than the degree,
     which means that cubic splines are of order 4.
     We will mostly consider cubic splines,
-    but some of the presented algorithms allow arbitrary degee,
+    but some of the presented algorithms allow arbitrary degree,
     for example `De Casteljau's algorithm`__.
 
     __ bezier-de-casteljau.ipynb
