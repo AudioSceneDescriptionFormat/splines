@@ -106,17 +106,14 @@ templates_path = ['_templates']
 
 # See https://github.com/mcmtroffaes/sphinxcontrib-bibtex/issues/156
 
-import docutils
-import sphinx.builders.latex
+import sphinx.builders.latex.transforms
 
-class DummyTransform(docutils.transforms.Transform):
+class DummyTransform(sphinx.builders.latex.transforms.BibliographyTransform):
 
-    default_priority = 0
-
-    def apply(self):
+    def run(self, **kwargs):
         pass
 
-sphinx.builders.latex.BibliographyTransform = DummyTransform
+sphinx.builders.latex.transforms.BibliographyTransform = DummyTransform
 
 # -- Get version information and date from Git ----------------------------
 
@@ -150,27 +147,28 @@ latex_elements = {
     'papersize': 'a4paper',
     'printindex': '',
     'sphinxsetup': r"""
-        VerbatimColor={HTML}{F5F5F5},
-        VerbatimBorderColor={HTML}{E0E0E0},
-        noteBorderColor={HTML}{E0E0E0},
-        noteborder=1.5pt,
-        warningBorderColor={HTML}{E0E0E0},
-        warningborder=1.5pt,
-        warningBgColor={HTML}{FBFBFB},
-    """,
-    'preamble': r"""
-\usepackage[sc,osf]{mathpazo}
+HeaderFamily=\rmfamily\bfseries,
+noteBorderColor={HTML}{E0E0E0},
+noteborder=1.5pt,
+warningBorderColor={HTML}{E0E0E0},
+warningborder=1.5pt,
+warningBgColor={HTML}{FBFBFB},
+""",
+    'fontpkg': r"""
+\usepackage{mathpazo}
 \linespread{1.05}  % see http://www.tug.dk/FontCatalogue/urwpalladio/
-\renewcommand{\sfdefault}{pplj}  % Palatino instead of sans serif
-\IfFileExists{zlmtt.sty}{
-    \usepackage[light,scaled=1.05]{zlmtt}  % light typewriter font from lmodern
-}{
-    \renewcommand{\ttdefault}{lmtt}  % typewriter font from lmodern
-}
+\setmainfont{TeX Gyre Pagella}[Numbers=OldStyle]
+\setmonofont{Latin Modern Mono Light}[Numbers=Lining]
 \usepackage{mathrsfs}  % for \mathscr{}
+""",
+    'preamble': r"""
+\urlstyle{tt}
 """,
 }
 
+latex_engine = 'lualatex'
+latex_use_xindy = False
+latex_table_style = ['booktabs']
 latex_show_urls = 'footnote'
 latex_show_pagerefs = True
 latex_domain_indices = False

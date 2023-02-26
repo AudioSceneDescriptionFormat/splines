@@ -6,7 +6,7 @@ References
     \begingroup
     \def\section#1#2{}
     \def\chapter#1#2{}
-    \begin{thebibliography}{123456}
+    \begin{thebibliography}{1234}
 
 .. bibliography::
     :style: alpha
