@@ -2,7 +2,7 @@ Introduction
 ============
 
 This is the documentation for the
-splines_ module for Python.
+|splines|__ module for Python.
 However, instead of a Python module with a bit of documentation,
 this project is mostly documentation,
 with a bit of Python module at the side.
@@ -12,12 +12,13 @@ for fully understanding the presented types of splines
 and their inter-relations.
 The Python module serves mostly for experimenting further with the presented
 ideas and methods.
-Therefore, the implementation is not focused at efficiency.
+Therefore, the implementation is not focused on efficiency.
 
-.. _splines: https://pypi.org/project/splines/
+.. |splines| replace:: ``splines``
+__ https://pypi.org/project/splines/
 
 The documentation consists of two main parts.
-The :doc:`first part <euclidean/index>` investigates *polynomial splines*
+The :doc:`first part <euclidean/index>` investigates some *polynomial splines*
 in their natural habitat, the Euclidean space.
 In the unlikely case you are reading this
 without knowing what "spline" means,
@@ -46,7 +47,7 @@ The derivations are often utilizing SymPy_ to make them more reproducible
 and to ease further experimentation.
 A special focus is put on *non-uniform* splines,
 which seem to have been neglected in some of the literature
-and especially in online resources.
+and especially in some online resources.
 
 .. _SymPy: https://www.sympy.org/
 
