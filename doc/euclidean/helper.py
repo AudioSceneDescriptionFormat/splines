@@ -1,4 +1,5 @@
 """Helper functions for plotting."""
+from cycler import cycler as _cycler
 import matplotlib.pyplot as _plt
 import numpy as _np
 import sympy as _sp
@@ -131,6 +132,8 @@ def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
     """Plot a polynomial basis (given as SymPy expressions)."""
     if ax is None:
         ax = _plt.gca()
+    ax.set_prop_cycle(_plt.rcParams['axes.prop_cycle'][:5] + _cycler(
+        linestyle=['-', '--', ':', '-.', (0, (4.5, 1.5, 1, 1.5, 1, 1.5))]))
     plot_sympy(*args, (parameter, 0, 1))
     grid_lines([0, 1], [0, 1], ax=ax)
     if labels is None:
