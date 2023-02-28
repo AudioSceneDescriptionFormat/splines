@@ -19,11 +19,9 @@ with reference to a drawing tool called spline_.
     -- :cite:`schoenberg1946smoothing`, page 67
 
 The term is defined in the context of what is nowadays known as
-`natural splines`__, especially cubic natural splines
+`natural splines`_, especially cubic natural splines
 (i.e. of degree 3; i.e. of order 4),
 which have :math:`C^2` continuity.
-
-__ natural.ipynb
 
 ..
 
@@ -47,13 +45,12 @@ Later, we will also have a look at `rotation splines`__.
 
 __ ../rotation/index.ipynb
 
-Sometimes it is not clear whether the term *spline*
+Sometimes it is not obvious whether the term *spline*
 refers to the composite curve or to one of its segments,
-especially when talking about `Bézier splines`__.
+especially when talking about `Bézier splines`_.
 In the rest of this text we are using the term *spline*
 to refer to the entire composite curve.
 
-__ bezier.ipynb
 
 Properties
 ----------
@@ -94,8 +91,7 @@ parametric
     which have to be calculated from the appropriate sub-range
     of the main spline parameter.
 
-    A spline can also be re-parameterized,
-    most notably for arc-length parameterization.
+    A spline can also be re-parameterized, see :doc:`re-parameterization`.
 
     The sequence of parameter values at the start and end of segments
     is sometimes (e.g. in :cite:`gordon1974bspline`) called the *knot vector*.
@@ -132,7 +128,7 @@ continuous
     The spline is called :math:`C^1` continuous
     if the first derivatives of the two neighboring segments
     at each transition are equal and
-    :math:`C^2` continuous if the second derivatives match.
+    :math:`C^2` continuous if also the second derivatives match.
 
 control points
     Splines are fully defined by the mathematical functions of their segments
@@ -146,10 +142,10 @@ control points
     where the curve is supposed to pass through.
     Based on those points, the appropriate functions for the
     spline segments are constructed.
-    The `Catmull--Rom`_ and natural_ splines are examples
+    The `Catmull--Rom splines`_ and `natural splines`_ are examples
     where segments are derived from such a sequence of control points.
 
-    Some splines, most notably Bézier_ splines,
+    Some splines, most notably `Bézier splines`_,
     pass only through some of their control points and
     the remaining control points affect the shape of the curve
     between those points.
@@ -160,7 +156,7 @@ control points
     Some splines have a set of control points where they pass through
     and additional values that are not points at all.
     We call them *control values*.
-    For example, `Hermite`_ splines pass through a set of control points,
+    For example, `Hermite splines`_ pass through a set of control points,
     but they need additional information about the tangent vectors
     (i.e. the first derivatives) at the transitions between segments.
     For higher-order splines they also need the second and higher derivatives.
@@ -172,7 +168,7 @@ interpolating
     it is called *approximating*.
 
     Here we are almost exclusively talking about interpolating splines.
-    A notable special case are Bézier_ splines,
+    A notable special case are `Bézier splines`_,
     which pass through a sequence of control points,
     but between each pair of those interpolated control points
     there are :math:`d - 1` (where :math:`d` is the degree)
@@ -192,7 +188,7 @@ local control
 additional parameters
     Some types of splines have additional parameters,
     either separately for each vertex, or the same one(s) for all vertices.
-    An example are `Kochanek--Bartels`_ splines with their
+    An example are `Kochanek--Bartels splines`_ with their
     *tension*, *continuity* and *bias* parameters.
 
 polynomial
@@ -240,38 +236,38 @@ Types
 There are an infinite number of types of splines,
 only very few of which will be presented in the following sections.
 Some of them can create the same curve from different control values,
-like Hermite_ and Bézier_ splines.
+like `Hermite splines`_ and `Bézier splines`_.
 Some create different curves from the same control values,
-like `Catmull--Rom`_ and natural_ splines.
+like `Catmull--Rom splines`_ and `natural splines`_.
 Some have additional parameters to control the shape of the curve,
-like `Kochanek--Bartels`_ splines with their TCB values.
+like `Kochanek--Bartels splines`_ with their TCB values.
 
 Some spline types have certain constraints
 on the transitions between segments,
-for example natural_ splines require :math:`C^2` continuity.
+for example, natural splines require :math:`C^2` continuity.
 Other splines have no such constraints,
-like for example Hermite_ splines,
+like for example Hermite splines,
 which allow specifying arbitrary derivatives at their segment transitions.
 
-Cubic splines cannot be interpolating and have :math:`C^2` continuity and
+Cubic splines cannot be interpolating *and* have :math:`C^2` continuity *and*
 local control at the same time.
 
-=============== ============= =========== =============
-type            local control continuity  interpolating
-=============== ============= =========== =============
-`Catmull--Rom`_ yes           :math:`C^1` yes
-natural_        no            :math:`C^2` yes
-B-splines_      yes           :math:`C^2` no
-=============== ============= =========== =============
+======================= ============= =========== =============
+type                    local control continuity  interpolating
+======================= ============= =========== =============
+`Catmull--Rom splines`_ yes           :math:`C^1` yes
+`natural splines`_      no            :math:`C^2` yes
+B-splines_              yes           :math:`C^2` no
+======================= ============= =========== =============
 
-.. _Hermite: hermite.ipynb
-.. _Bézier: bezier.ipynb
-.. _Catmull--Rom: catmull-rom.ipynb
-.. _natural: natural.ipynb
-.. _Kochanek--Bartels: kochanek-bartels.ipynb
+.. _Hermite splines: hermite.ipynb
+.. _Bézier splines: bezier.ipynb
+.. _Catmull--Rom splines: catmull-rom.ipynb
+.. _natural splines: natural.ipynb
+.. _Kochanek--Bartels splines: kochanek-bartels.ipynb
 .. _B-splines: https://en.wikipedia.org/wiki/B-spline
 
-`Kochanek--Bartels`_ splines with :math:`C = 0`
+Kochanek--Bartels splines with :math:`C = 0`
 are in the same category as Catmull--Rom splines
 (which are a subset of former).
 
@@ -283,9 +279,9 @@ This means that different types of polynomial splines
 can be unambiguously (if using the same parameter intervals)
 converted between each other
 as long as the target spline has the same or weaker constraints.
-For example, any natural_ spline can be converted into
-its corresponding Bézier_ spline.
+For example, any natural spline can be converted into
+its corresponding Bézier spline.
 The reverse is not true.
-`Catmull--Rom`_ splines and natural_ splines
+Catmull--Rom splines and natural splines
 can generally not be converted between each other
 because they have mutually incompatible constraints.
