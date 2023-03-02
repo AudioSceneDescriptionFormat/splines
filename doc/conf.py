@@ -149,7 +149,7 @@ latex_elements = {
     'sphinxsetup': r"""
 HeaderFamily=\rmfamily\bfseries,
 noteBorderColor={HTML}{E0E0E0},
-noteborder=1.5pt,
+noteborder=0.5pt,
 warningBorderColor={HTML}{E0E0E0},
 warningborder=1.5pt,
 warningBgColor={HTML}{FBFBFB},
@@ -163,6 +163,8 @@ warningBgColor={HTML}{FBFBFB},
 """,
     'preamble': r"""
 \urlstyle{tt}
+\renewenvironment{sphinxnote}[1]
+  {\begin{sphinxheavybox}\sphinxstrong{#1} }{\end{sphinxheavybox}}
 """,
 }
 
