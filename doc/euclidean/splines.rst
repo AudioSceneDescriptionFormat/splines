@@ -73,7 +73,7 @@ piecewise
     This can be avoided by using multiple polynomial pieces of lower degrees.
 
     __ lagrange.ipynb
-    __ lagrange.ipynb#Runge’s-Phenomenon
+    __ lagrange.ipynb#Runge's-Phenomenon
 
 parametric
     Here we are only talking about *univariate* curves,
