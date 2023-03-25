@@ -21,7 +21,7 @@ The documentation consists of two main parts.
 The :doc:`first part <euclidean/index>` investigates some *polynomial splines*
 in their natural habitat, the Euclidean space.
 In the unlikely case you are reading this
-without knowing what "spline" means,
+and don't know what "spline" means,
 the first part also contains
 :doc:`a definition of the term <euclidean/splines>`
 and a description of some of the common properties of splines.
@@ -43,7 +43,7 @@ Furthermore, the paper only considers *uniform* curves,
 where all parameter intervals have a size of 1.
 One goal of this documentation is to show the derivation of
 all equations and matrices.
-The derivations are often utilizing SymPy_ to make them more reproducible
+The derivations often utilize SymPy_ to make them more reproducible
 and to ease further experimentation.
 A special focus is put on *non-uniform* splines,
 which seem to have been neglected in some of the literature

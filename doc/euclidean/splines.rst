@@ -146,7 +146,7 @@ control points
     where segments are derived from such a sequence of control points.
 
     Some splines, most notably `Bézier splines`_,
-    pass only through some of their control points and
+    only pass through some of their control points and
     the remaining control points affect the shape of the curve
     between those points.
 
