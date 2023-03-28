@@ -140,7 +140,7 @@ def plot_basis(*args, ax=None, parameter=_sp.Symbol('t'), labels=None):
         labels = args
     if labels:
         ax.legend([latexify(l) for l in labels])
-    ax.set_xlabel(latexify(parameter))
+    ax.set_xlabel(latexify(parameter), labelpad=-4)
     ax.set_ylabel('weight')
 
 
