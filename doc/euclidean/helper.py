@@ -161,3 +161,10 @@ def plot_x_3_to_6(points, ax):
     ax.text(*points[3], r'$\mathbf{x}_6$', **options)
     # Plot invisible points to make sure autoscaling doesn't crop the text
     ax.scatter(*points.T, marker='', c='chartreuse')
+
+
+def show_animation(ani, default_mode='reflect'):
+    display({
+        'text/html': ani.to_jshtml(default_mode=default_mode),
+        'text/plain': 'Animations can only be shown in HTML output, sorry!',
+    }, raw=True)
