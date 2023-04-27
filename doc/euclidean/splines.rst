@@ -2,7 +2,7 @@ Splines
 =======
 
 The term *spline* for the mathematical description of a smooth piecewise curve
-was introduced in :cite:`schoenberg1946smoothing`,
+was introduced by :cite:t:`schoenberg1946smoothing`,
 with reference to a drawing tool called spline_.
 
 .. _spline: https://en.wiktionary.org/wiki/spline
@@ -16,7 +16,7 @@ with reference to a drawing tool called spline_.
     (called "dogs" or "rats")
     such as to take the shape of the curve we wish to draw.
 
-    -- :cite:`schoenberg1946smoothing`, page 67
+    -- :cite:t:`schoenberg1946smoothing`, page 67
 
 The term is defined in the context of what is nowadays known as
 `natural splines`_, especially cubic natural splines
@@ -29,7 +29,7 @@ which have :math:`C^2` continuity.
     means of a spline and for this reason we propose to call them
     *spline curves of order* :math:`k`.
 
-    -- :cite:`schoenberg1946smoothing`, page 48
+    -- :cite:t:`schoenberg1946smoothing`, page 48
 
 
 Definition
@@ -94,7 +94,8 @@ parametric
     A spline can also be re-parameterized, see :doc:`re-parameterization`.
 
     The sequence of parameter values at the start and end of segments
-    is sometimes (e.g. in :cite:`gordon1974bspline`) called the *knot vector*.
+    is sometimes -- e.g. by :cite:t:`gordon1974bspline` --
+    called the *knot vector*.
     In the accompanying :doc:`/python-module`, however,
     it is called ``grid``.
 
@@ -208,7 +209,7 @@ degree
     The degree of a polynomial spline is the highest degree among its segments.
     Splines of degree 3, a.k.a *cubic* splines,
     are very common for drawing smooth curves.
-    Old-school references like :cite:`de_boor1978splines`
+    Old-school references by authors like :cite:t:`de_boor1978splines`
     might use the term *order*, which is one more than the degree,
     which means that cubic splines are of order 4.
     We will mostly consider cubic splines,
