@@ -35,6 +35,8 @@ autodoc_default_options = {
 
 default_role = 'any'
 
+exclude_patterns = ['how-to-navigate.rst']
+
 linkcheck_ignore = [
     # Anchors with line numbers don't seem to work with linkcheck builder
     'https://github.com/scipy/scipy/blob/',
