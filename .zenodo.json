@@ -1,0 +1,12 @@
+{
+    "creators": [
+        {
+            "orcid": "0000-0002-6330-7910",
+            "name": "Geier, Matthias"
+        }
+    ],
+    "contributors": [],
+    "license": "MIT",
+    "title": "Splines in Euclidean Space and Beyond",
+    "description": "... with focus on univariate, non-uniform piecewise cubic polynomial curves in one, two and three spatial dimensions, as well as rotation splines."
+}
