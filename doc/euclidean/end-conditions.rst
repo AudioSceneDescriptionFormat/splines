@@ -35,8 +35,6 @@ closed
     the spline can just continue at the first control point.
     For non-uniform splines an additional parameter interval has to be specified
     for the segment that's inserted between the end and the beginning.
-    For one-dimensional splines this can arguably be more appropriately called
-    *cyclic* end condition.
 
 For most splines in the `splines module`__,
 *clamped*, *natural* and *closed* end conditions are available
