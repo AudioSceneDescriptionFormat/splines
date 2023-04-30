@@ -207,7 +207,7 @@ polynomial
 
 degree
     The degree of a polynomial spline is the highest degree among its segments.
-    Splines of degree 3, a.k.a *cubic* splines,
+    Splines of degree 3, a.k.a. *cubic* splines,
     are very common for drawing smooth curves.
     Old-school references by authors like :cite:t:`de_boor1978splines`
     might use the term *order*, which is one more than the degree,
