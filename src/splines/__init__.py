@@ -756,12 +756,15 @@ class UnitSpeedAdapter:
     def __init__(self, curve):
         """Re-parameterize a spline to have a constant speed of 1.
 
-        For splines in Euclidean space this amounts to arc-length
-        parameterization.
+        For splines in Euclidean space this amounts to
+        :ref:`/euclidean/re-parameterization.ipynb#Arc-Length-Parameterization`.
 
         However, this class is implemented in a way that also allows using
-        rotation splines which will be re-parameterized to have a constant
-        angular speed of 1.
+        rotation splines which will be re-parameterized to have a
+        :ref:`/rotation/de-casteljau.ipynb#Constant-Angular-Speed` of 1.
+        For this to work, the second derivative of *curve* has to yield
+        an angular velocity vector.
+        See `splines.quaternion.DeCasteljau` for an example.
 
         The parameter *s* represents the cumulative arc-length or the
         cumulative rotation angle, respectively.
@@ -808,6 +811,7 @@ class UnitSpeedAdapter:
         return bisect(length, t0, t1)
 
     def evaluate(self, s):
+        """Get value at the given parameter value(s)."""
         if not _np.isscalar(s):
             return _np.array([self.evaluate(s) for s in s])
         return self.curve.evaluate(self._s2t(s))
@@ -856,6 +860,7 @@ class NewGridAdapter:
         self.curve = curve
 
     def evaluate(self, u):
+        """Get value at the given parameter value(s)."""
         if not _np.isscalar(u):
             return _np.array([self.evaluate(u) for u in u])
         idx = _check_param('u', u, self.grid)
