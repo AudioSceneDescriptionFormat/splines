@@ -1,10 +1,10 @@
 """Piecewise polynomial curves (in Euclidean space).
 
-.. rubric:: Submodules
+.. topic:: Submodules
 
-.. autosummary::
-
-    quaternion
+    .. autosummary::
+    
+        quaternion
 
 """
 from bisect import bisect_right as _bisect_right, bisect_left as _bisect_left

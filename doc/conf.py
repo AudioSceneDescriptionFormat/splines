@@ -155,6 +155,9 @@ noteborder=0.5pt,
 warningBorderColor={HTML}{E0E0E0},
 warningborder=1.5pt,
 warningBgColor={HTML}{FBFBFB},
+div.topic_box-shadow=none,
+div.topic_border-TeXcolor={HTML}{E0E0E0},
+div.topic_border-width=0.5pt,
 """,
     'fontpkg': r"""
 \usepackage{mathpazo}
