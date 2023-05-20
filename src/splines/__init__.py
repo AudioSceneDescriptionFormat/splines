@@ -3,7 +3,7 @@
 .. topic:: Submodules
 
     .. autosummary::
-    
+
         quaternion
 
 """
@@ -20,7 +20,7 @@ __version__ = '0.2.0'
 class Monomial:
     """Piecewise polynomial curve, see __init__()."""
 
-    def __init__(self, segments, grid):
+    def __init__(self, segments, grid=None):
         r"""Piecewise polynomial curve using monomial basis.
 
         See :ref:`/euclidean/polynomials.ipynb`.
@@ -28,19 +28,19 @@ class Monomial:
         Coefficients can have arbitrary dimension.
         An arbitrary polynomial degree :math:`d` can be used by specifying
         :math:`d + 1` coefficients per segment.
-        The :math:`i`-th segment is evaluated using this equation:
+        The :math:`i`-th segment is evaluated using
 
         .. math::
 
             \boldsymbol{p}_i(t) = \sum_{k=0}^d
                 \boldsymbol{a}_{i,k} \left(\frac{t - t_i}{t_{i+1} - t_i}\right)^k
-                \text{ for } t_i \leq t < t_{i+1}
+                \text{ for } t_i \leq t < t_{i+1}.
 
         This is similar to `scipy.interpolate.PPoly`, which states:
 
-            "High-order polynomials in the power basis can be numerically
+            High-order polynomials in the power basis can be numerically
             unstable.  Precision problems can start to appear for orders
-            larger than 20-30."
+            larger than 20-30.
 
         This shouldn't be a problem since most commonly splines of degree 3
         (i.e. cubic splines) are used.
@@ -51,6 +51,8 @@ class Monomial:
             Different segments can have different polynomial degree.
         :param grid: Sequence of parameter values :math:`t_i` corresponding to
             segment boundaries.  Must be strictly increasing.
+            If not specified, a uniform grid is used (0, 1, 2, 3, ...).
+        :type grid: optional
 
         """
         self.segments = [_np.array(coefficients, copy=True)
@@ -83,8 +85,7 @@ class Bernstein:
         r"""Bernstein basis polynomials of given *degree*, evaluated at *t*.
 
         Returns a list of values corresponding to
-        :math:`i = 0, \ldots, n`, given the degree :math:`n`,
-        using the formula
+        :math:`i = 0, \ldots, n`, given the degree :math:`n`, using
 
         .. math::
 
@@ -120,7 +121,11 @@ class Bernstein:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
-        """Get value at the given parameter value(s)."""
+        """Get value at the given parameter value(s) *t*.
+
+        Only ``n=0`` is currently supported.
+
+        """
         if n != 0:
             raise NotImplementedError('Derivatives are not implemented yet')
         if not _np.isscalar(t):
@@ -267,7 +272,7 @@ class CubicHermite(Monomial):
 
         :param vertices: Sequence of vertices.
         :param tangents: Sequence of tangent vectors
-            (two per segment, outgoing and incoming).
+            (two per segment: outgoing and incoming).
         :param grid: Sequence of parameter values.
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
@@ -320,7 +325,7 @@ class CatmullRom(CubicHermite):
         """Catmull--Rom spline.
 
         This class implements one specific member of the family of
-        splines described in :cite:`catmull1974splines`,
+        splines described by :cite:t:`catmull1974splines`,
         which is commonly known as *Catmull--Rom spline*:
         The cubic spline that can be constructed by linear Lagrange
         interpolation (and extrapolation) followed by quadratic B-spline
@@ -338,12 +343,13 @@ class CatmullRom(CubicHermite):
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :type grid: optional
-        :param alpha: TODO
+        :param alpha: See
+            :ref:`/euclidean/catmull-rom-properties.ipynb#Parameterized-Parameterization`.
         :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
-            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            ``'natural'`` or a pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
-            and an additional *grid* time has to be specified.
+            and an additional *grid* value has to be specified.
         :type endconditions: optional
 
         """
@@ -396,12 +402,13 @@ class KochanekBartels(CubicHermite):
         :param tcb: Sequence of *tension*, *continuity* and *bias* triples.
             TCB values can only be given for the interior vertices.
         :type tcb: optional
-        :param alpha: TODO
+        :param alpha: See
+            :ref:`/euclidean/catmull-rom-properties.ipynb#Parameterized-Parameterization`.
         :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
-            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            ``'natural'`` or a pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
-            and an additional *grid* time has to be specified.
+            and an additional *grid* value has to be specified.
         :type endconditions: optional
 
         """
@@ -446,12 +453,13 @@ class Natural(CubicHermite):
             Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
         :type grid: optional
-        :param alpha: TODO
+        :param alpha: See
+            :ref:`/euclidean/catmull-rom-properties.ipynb#Parameterized-Parameterization`.
         :type alpha: optional
         :param endconditions: Start/end conditions. Can be ``'closed'``,
-            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
+            ``'natural'`` or a pair of tangent vectors (a.k.a. "clamped").
             If ``'closed'``, the first vertex is re-used as last vertex
-            and an additional *grid* time has to be specified.
+            and an additional *grid* value has to be specified.
         :type endconditions: optional
 
         """
@@ -707,9 +715,9 @@ class MonotoneCubic(PiecewiseMonotoneCubic):
 
     # TODO: rename to something with "solve"?
     def get_time(self, value):
-        """Get the time instance for the given value.
+        """Get the time instance for the given *value*.
 
-        If the solution is not unique (i.e. there is a plateau),
+        If the solution is not unique (i.e. if there is a plateau),
         ``None`` is returned.
 
         """
@@ -760,11 +768,12 @@ class UnitSpeedAdapter:
         :ref:`/euclidean/re-parameterization.ipynb#Arc-Length-Parameterization`.
 
         However, this class is implemented in a way that also allows using
-        rotation splines which will be re-parameterized to have a
+        rotation splines, which will be re-parameterized to have a
         :ref:`/rotation/de-casteljau.ipynb#Constant-Angular-Speed` of 1.
-        For this to work, the second derivative of *curve* has to yield
+        For this to work, the second derivative of *curve* must yield
         an angular velocity vector.
-        See `splines.quaternion.DeCasteljau` for an example.
+        See `splines.quaternion.DeCasteljau` for an example of a
+        compatible rotation spline.
 
         The parameter *s* represents the cumulative arc-length or the
         cumulative rotation angle, respectively.
@@ -811,7 +820,7 @@ class UnitSpeedAdapter:
         return bisect(length, t0, t1)
 
     def evaluate(self, s):
-        """Get value at the given parameter value(s)."""
+        """Get value at the given parameter value(s) *s*."""
         if not _np.isscalar(s):
             return _np.array([self.evaluate(s) for s in s])
         return self.curve.evaluate(self._s2t(s))
@@ -822,6 +831,8 @@ class NewGridAdapter:
 
     def __init__(self, curve, new_grid=1, cyclic=False):
         """Re-parameterize a spline with new grid values.
+
+        This can be used for both Euclidean splines and rotation splines.
 
         :param curve: A spline.
         :param new_grid: If a single number is given, the new parameter
@@ -860,7 +871,7 @@ class NewGridAdapter:
         self.curve = curve
 
     def evaluate(self, u):
-        """Get value at the given parameter value(s)."""
+        """Get value at the given parameter value(s) *u*."""
         if not _np.isscalar(u):
             return _np.array([self.evaluate(u) for u in u])
         idx = _check_param('u', u, self.grid)

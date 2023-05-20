@@ -8,7 +8,7 @@ from . import _check_param, _dotproduct
 class Quaternion:
     """A very simple quaternion class.
 
-    This is the base class for the more relevant `UnitQuaternion` class.
+    This is the base class for the more relevant class `UnitQuaternion`.
 
     See the `notebook about quaternions`__.
 
@@ -111,7 +111,7 @@ class Quaternion:
     def dot(self, other):
         """Dot product of two quaternions.
 
-        This is the 4-dimensional dot product, yielding a scalar result.
+        This is the four-dimensional dot product, yielding a scalar result.
         This operation is commutative.
 
         Note that this is different from the quaternion multiplication
@@ -171,7 +171,7 @@ class UnitQuaternion(Quaternion):
     def from_unit_xyzw(cls, xyzw):
         """Create a unit quaternion from another unit quaternion.
 
-        :param xyzw: Components of a unit quaternion (`scalar` last).
+        :param xyzw: Components of a unit quaternion (``scalar`` last).
             This will *not* be normalized, it must already have unit length.
 
         """
@@ -196,6 +196,11 @@ class UnitQuaternion(Quaternion):
     def exp_map(cls, value):
         """Exponential map from :math:`R^3` to unit quaternions.
 
+        The *exponential map* operation transforms
+        a three-dimensional vector that's a member of the
+        tangent space at the identity quaternion
+        into a unit quaternion.
+
         This is the inverse operation to `log_map()`.
 
         :param value: Element of the tangent space at the quaternion identity.
@@ -213,8 +218,14 @@ class UnitQuaternion(Quaternion):
     def log_map(self):
         """Logarithmic map from unit quaternions to :math:`R^3`.
 
-        :returns: Corresponding vector in the tangent space at the
-            quaternion identity.
+        The *logarithmic map* operation transforms a unit quaternion
+        into a three-dimensional vector that's a member of the
+        tangent space at the identity quaternion.
+
+        This is the inverse operation to `exp_map()`.
+
+        :returns: Corresponding three-element vector in the tangent
+            space at the quaternion identity.
 
         """
         if self.scalar >= 1:
@@ -243,9 +254,9 @@ class UnitQuaternion(Quaternion):
         See :ref:`/rotation/quaternions.ipynb#Relative-Rotation-(Global-Frame-of-Reference)`.
 
         :param other: Target rotation.
-        :type other: UnitQuaternion
+        :type other: ``UnitQuaternion``
 
-        :returns: Relative rotation (as `UnitQuaternion`).
+        :returns: Relative rotation -- as ``UnitQuaternion``.
 
         """
         return other * self.inverse()
@@ -267,8 +278,10 @@ def slerp(one, two, t):
 
     See :ref:`/rotation/slerp.ipynb`.
 
-    :param one: Start quaternion.
-    :param two: End quaternion.
+    :param one: Start rotation.
+    :type one: ``UnitQuaternion``
+    :param two: End rotation.
+    :type two: ``UnitQuaternion``
     :param t: Parameter value(s) between 0 and 1.
 
     """
@@ -321,6 +334,11 @@ class PiecewiseSlerp:
         self.grid = list(grid)
 
     def evaluate(self, t, n=0):
+        """Get value at the given parameter value(s) *t*.
+
+        Only ``n=0`` is currently supported.
+
+        """
         if n != 0:
             raise NotImplementedError('Derivatives are not implemented yet')
         if not _np.isscalar(t):
@@ -334,10 +352,10 @@ class PiecewiseSlerp:
 
 
 class DeCasteljau:
-    """Spline using De Casteljau's algorithm, see __init__()."""
+    """Rotation spline using De Casteljau's algorithm, see __init__()."""
 
     def __init__(self, segments, grid=None):
-        """Spline using De Casteljau's algorithm with `slerp()`.
+        """Rotation spline using De Casteljau's algorithm with `slerp()`.
 
         See `the corresponding notebook`__ for details.
 
@@ -370,7 +388,7 @@ class DeCasteljau:
 
         :param t: Parameter value(s).
         :param n: Use ``0`` for calculating the value (a quaternion),
-            ``1`` for the angular velocity (a 3-element vector).
+            ``1`` for the angular velocity (a three-element vector).
         :type n: {0, 1}, optional
 
         """
@@ -459,15 +477,13 @@ class KochanekBartels(DeCasteljau):
             TCB values can only be given for the interior quaternions.
             If only two quaternions are given, TCB values are ignored.
         :type tcb: optional
-        :param alpha: TODO
+        :param alpha: See
+            :ref:`/euclidean/catmull-rom-properties.ipynb#Parameterized-Parameterization`.
         :type alpha: optional
-        :param endconditions: Start/end conditions. Can be ``'closed'``,
-            ``'natural'`` or pair of tangent vectors (a.k.a. "clamped").
-
-            TODO: clamped
-
+        :param endconditions: Start/end conditions. Can be ``'closed'`` or
+            ``'natural'``.
             If ``'closed'``, the first rotation is re-used as last rotation
-            and an additional *grid* time has to be specified.
+            and an additional *grid* value has to be specified.
         :type endconditions: optional
 
         """
@@ -625,12 +641,14 @@ def _natural_control_quaternion(first, third):
 
 
 class BarryGoldman:
-    """Rotation spline using Barry--Goldman algorithm, see __init__()."""
+    """Rotation spline using the Barry--Goldman algorithm, see __init__()."""
 
     def __init__(self, quaternions, grid=None, *, alpha=None):
-        """Rotation spline using Barry--Goldman algorithm.
+        """Rotation spline using the Barry--Goldman algorithm with `slerp()`.
 
         Always closed (for now).
+
+        See :ref:`/rotation/barry-goldman.ipynb`.
 
         """
         # TODO: what happens when exactly 2 quaternions are given?
@@ -638,6 +656,7 @@ class BarryGoldman:
         self.grid = list(_check_grid(grid, alpha, self.quaternions))
 
     def evaluate(self, t):
+        """Get value at the given parameter value(s) *t*."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t) for t in t])
         idx = _check_param('t', t, self.grid)
@@ -741,6 +760,7 @@ class Squad:
         ]
 
     def evaluate(self, t):
+        """Get value at the given parameter value(s) *t*."""
         if not _np.isscalar(t):
             return _np.array([self.evaluate(t) for t in t])
         idx = _check_param('t', t, self.grid)
