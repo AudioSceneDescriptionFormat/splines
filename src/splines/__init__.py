@@ -42,13 +42,13 @@ class Monomial:
             unstable.  Precision problems can start to appear for orders
             larger than 20-30.
 
-        This shouldn't be a problem since most commonly splines of degree 3
+        This shouldn't be a problem, since most commonly splines of degree 3
         (i.e. cubic splines) are used.
 
         :param segments: Sequence of polynomial segments.
             Each segment :math:`\boldsymbol{a}_i` contains coefficients
             for the monomial basis (in order of decreasing degree).
-            Different segments can have different polynomial degree.
+            Different segments can have different polynomial degrees.
         :param grid: Sequence of parameter values :math:`t_i` corresponding to
             segment boundaries.  Must be strictly increasing.
             If not specified, a uniform grid is used (0, 1, 2, 3, ...).
