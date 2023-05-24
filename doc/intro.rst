@@ -33,7 +33,7 @@ whose API documentation is available at
 :mod:`splines` and :mod:`splines.quaternion`, respectively.
 
 This project was originally inspired by :cite:t:`millington2009matrices`,
-which concisely lists the *basis matrices*
+who concisely lists the *basis matrices*
 (a.k.a. *characteristic matrices*)
 of a few common types of splines
 and also provides matrices that can be used to convert *control points*
