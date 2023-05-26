@@ -25,7 +25,7 @@ class Monomial:
 
         See :ref:`/euclidean/polynomials.ipynb`.
 
-        Coefficients can have arbitrary dimension.
+        Coefficients can have an arbitrary number of dimensions.
         An arbitrary polynomial degree :math:`d` can be used by specifying
         :math:`d + 1` coefficients per segment.
         The :math:`i`-th segment is evaluated using
