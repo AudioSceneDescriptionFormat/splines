@@ -246,7 +246,8 @@ class UnitQuaternion(Quaternion):
     @property
     def angle(self):
         """The rotation angle in radians."""
-        return 2 * _math.acos(self.scalar)
+        clipped = min(max(-1.0, self.scalar), 1.0)
+        return 2 * _math.acos(clipped)
 
     def rotation_to(self, other):
         """Rotation required to rotate *self* into *other*.
