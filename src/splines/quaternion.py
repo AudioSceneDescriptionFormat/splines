@@ -754,6 +754,7 @@ class Squad:
                 ) * q0,
             ])
         del control_points[:2]
+        del control_points[-2:]
         self.segments = [
             control_points[i:i + 4]
             for i in range(0, len(control_points), 4)
