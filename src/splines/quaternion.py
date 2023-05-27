@@ -740,17 +740,17 @@ class Squad:
         for (q_1, q0, q1), (t_1, t0, t1) in zip(*triples):
             control_points.extend([
                 UnitQuaternion.exp_map(
-                    - (t1 - t0) / (2 * (t1 - t_1)) * (
-                        q0.rotation_to(q1).log_map() +
-                        (t1 - t0) * q0.rotation_to(q_1).log_map() / (t0 - t_1)
+                    - (t0 - t_1) / (2 * (t1 - t_1)) * (
+                        (t0 - t_1) * q0.rotation_to(q1).log_map() / (t1 - t0) +
+                        q0.rotation_to(q_1).log_map()
                     )
                 ) * q0,
                 q0,
                 q0,
                 UnitQuaternion.exp_map(
-                    - (t0 - t_1) / (2 * (t1 - t_1)) * (
-                        (t0 - t_1) * q0.rotation_to(q1).log_map() / (t1 - t0) +
-                        q0.rotation_to(q_1).log_map()
+                    - (t1 - t0) / (2 * (t1 - t_1)) * (
+                        q0.rotation_to(q1).log_map() +
+                        (t1 - t0) * q0.rotation_to(q_1).log_map() / (t0 - t_1)
                     )
                 ) * q0,
             ])
