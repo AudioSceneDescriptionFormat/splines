@@ -42,6 +42,8 @@ linkcheck_ignore = [
     'https://github.com/scipy/scipy/blob/',
     # The idea of DOIs is that they are kept valid, so why check them at all?
     'https://doi.org/',
+    # This causes timeout errors during linkcheck:
+    'https://chm.secure.nonprofitsoapbox.com/donate',
 ]
 
 nbsphinx_execute_arguments = [
