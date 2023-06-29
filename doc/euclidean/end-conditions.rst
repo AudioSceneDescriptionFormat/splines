@@ -21,7 +21,7 @@ here we will mention only a few of them.
 clamped
     This means providing a fixed tangent (i.e. first derivative)
     at the beginning and end of a cubic spline.
-    For higher degree splines, additional derivatives have to be be specified.
+    For higher degree splines, additional derivatives have to be specified.
 
 natural
     For a cubic spline, this means setting the second derivative
