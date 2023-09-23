@@ -519,6 +519,20 @@ class Natural(CubicHermite):
         CubicHermite.__init__(self, vertices, tangents, grid)
 
 
+def _monotonous_slope(slope, left, right):
+    """Manipulate the slope to preserve monotonicity.
+
+    See Dougherty et al. (1989), eq. (4.2)
+
+    """
+    if left * right <= 0:
+        return 0
+    elif right > 0:
+        return min(max(0, slope), 3 * min(abs(left), abs(right)))
+    else:
+        return max(min(0, slope), -3 * min(abs(left), abs(right)))
+
+
 def _monotone_end_condition(inner_slope, secant_slope):
     """
 
@@ -585,19 +599,6 @@ class PiecewiseMonotoneCubic(CatmullRom):
             first_interval = grid[1] - grid[0]
             grid = list(grid) + [grid[-1] + first_interval]
 
-        def fix_slope(slope, left, right):
-            """Manipulate the slope to preserve monotonicity.
-
-            See Dougherty et al. (1989), eq. (4.2)
-
-            """
-            if left * right <= 0:
-                return 0
-            elif right > 0:
-                return min(max(0, slope), 3 * min(abs(left), abs(right)))
-            else:
-                return max(min(0, slope), -3 * min(abs(left), abs(right)))
-
         final_slopes = []
         for xs, ts, slope in zip(zip(values, values[1:], values[2:]),
                                  zip(grid, grid[1:], grid[2:]),
@@ -609,9 +610,9 @@ class PiecewiseMonotoneCubic(CatmullRom):
             if slope is None:
                 # NB: This has to be defined on the parent class:
                 slope = self._calculate_tangent(xs, ts)
-                slope = fix_slope(slope, left, right)
+                slope = _monotonous_slope(slope, left, right)
             else:
-                if slope != fix_slope(slope, left, right):
+                if slope != _monotonous_slope(slope, left, right):
                     raise ValueError(f'Slope too steep: {slope}')
             final_slopes.append(slope)  # incoming
             final_slopes.append(slope)  # outgoing
@@ -626,7 +627,8 @@ class PiecewiseMonotoneCubic(CatmullRom):
             one, two = slopes
 
             def check_slope(slope):
-                if slope != fix_slope(slope, secant_slope, secant_slope):
+                if slope != _monotonous_slope(
+                        slope, secant_slope, secant_slope):
                     raise ValueError(f'Slope too steep or wrong sign: {slope}')
 
             if one is None:
@@ -653,7 +655,8 @@ class PiecewiseMonotoneCubic(CatmullRom):
                 if outer is None:
                     outer = _monotone_end_condition(inner, secant_slope)
                 else:
-                    if outer != fix_slope(outer, secant_slope, secant_slope):
+                    if outer != _monotonous_slope(
+                            outer, secant_slope, secant_slope):
                         raise ValueError(
                             f'Slope too steep or wrong sign: {outer}')
                 return outer
@@ -694,16 +697,17 @@ class MonotoneCubic(PiecewiseMonotoneCubic):
             if (slopes[0], slopes[-1]) != (None, None):
                 raise ValueError(
                     'If "cyclic", the first and last slope must be None')
-            temp_values = (
-                values[-2],
-                values[-1],
-                values[-1] + (values[1] - values[0]))
-            temp_grid = (
-                grid[-2],
-                grid[-1],
-                grid[-1] + (grid[1] - grid[0]))
-            temp_spline = PiecewiseMonotoneCubic(temp_values, grid=temp_grid)
-            cyclic_slope = temp_spline.evaluate(temp_grid[1], 1)
+            x_1 = values[-2]
+            x0 = values[-1]
+            x1 = values[-1] + (values[1] - values[0])
+            t_1 = grid[-2]
+            t0 = grid[-1]
+            t1 = grid[-1] + (grid[1] - grid[0])
+            left = (x0 - x_1) / (t0 - t_1)
+            right = (x1 - x0) / (t1 - t0)
+            cyclic_slope = self._calculate_tangent(
+                (x_1, x0, x1), (t_1, t0, t1))
+            cyclic_slope = _monotonous_slope(cyclic_slope, left, right)
             slopes[0] = cyclic_slope
             slopes[-1] = cyclic_slope
 
