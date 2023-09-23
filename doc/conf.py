@@ -44,6 +44,9 @@ linkcheck_ignore = [
     'https://doi.org/',
     # This causes timeout errors during linkcheck:
     'https://chm.secure.nonprofitsoapbox.com/donate',
+    # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
+    # unable to get local issuer certificate
+    'https://www.computerhistory.org/collections/catalog/102724883',
 ]
 
 nbsphinx_execute_arguments = [
