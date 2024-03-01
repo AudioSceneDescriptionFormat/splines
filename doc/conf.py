@@ -47,6 +47,8 @@ linkcheck_ignore = [
     # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
     # unable to get local issuer certificate
     'https://www.computerhistory.org/collections/catalog/102724883',
+    # 403 Client Error: Forbidden for url:
+    'https://stackoverflow.com/a/23980479/',
 ]
 
 nbsphinx_execute_arguments = [
