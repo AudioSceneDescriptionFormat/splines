@@ -16,6 +16,8 @@ Documentation notebooks on Binder
 Source code repository (and issue tracker)
     https://github.com/AudioSceneDescriptionFormat/splines
 
+DOI
+    https://doi.org/10.5281/zenodo.4568902
+
 License
     MIT -- see the file ``LICENSE`` for details.
-
