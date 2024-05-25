@@ -86,7 +86,7 @@ def plot_spline_2d(spline, dots_per_second=15, marker='.', linestyle='',
     total_duration = spline.grid[-1] - spline.grid[0]
     dots = int(total_duration * dots_per_second) + 1
     times = spline.grid[0] + _np.arange(dots) / dots_per_second
-    plot_vertices_2d(spline.evaluate(spline.grid), chords=chords)
+    plot_vertices_2d(spline.evaluate(spline.grid), chords=chords, ax=ax)
     ax.plot(
         *spline.evaluate(times).T,
         marker=marker,
