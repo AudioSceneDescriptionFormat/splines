@@ -66,7 +66,7 @@ def if_docname(text):
     'euclidean/kochanek-bartels',
     'euclidean/end-conditions',
 ] %}
-{% set docname = 'doc/' + env.doc2path(env.docname, base=None) %}
+{% set docname = 'doc/' + env.doc2path(env.docname, base=None)|string %}
 {% set latex_href = ''.join([
     '\href{https://github.com/AudioSceneDescriptionFormat/splines/blob/',
     env.config.release,
