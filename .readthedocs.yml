@@ -11,5 +11,7 @@ python:
     - requirements: doc/requirements.txt
     - method: pip
       path: .
+sphinx:
+  configuration: doc/conf.py
 formats:
   - pdf
