@@ -520,7 +520,7 @@ class KochanekBartels(DeCasteljau):
             assert len(quaternions) == 2
             assert len(grid) == 2
             assert not closed
-            assert not tcb
+            assert tcb.size == 0
             q0, q1 = quaternions
             offset = (q1 * q0.inverse())**(1 / 3)  # "cubic" spline, degree 3
             control_points = [q0, offset * q0, offset.inverse() * q1, q1]
