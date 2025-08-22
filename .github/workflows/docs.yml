@@ -49,7 +49,7 @@ jobs:
           path: _build/latex/splines.pdf
       - name: Check links
         run: |
-          $SPHINX doc/ _build/linkcheck/ -d _build/doctrees/ -b linkcheck
+          $SPHINX doc/ _build/linkcheck/ -d _build/doctrees/ -b linkcheck -q
       - name: Upload linkcheck results
         uses: actions/upload-artifact@v4
         if: ${{ success() || failure() }}

@@ -49,6 +49,8 @@ linkcheck_ignore = [
     'https://www.computerhistory.org/collections/catalog/102724883',
     # 403 Client Error: Forbidden for url:
     'https://stackoverflow.com/a/23980479/',
+    # 403 Client Error: Forbidden for url:
+    'https://www.blender.org',
 ]
 
 nbsphinx_execute_arguments = [
