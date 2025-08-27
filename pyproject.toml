@@ -1,3 +1,45 @@
 [build-system]
-requires = ["setuptools >= 40.8.0"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "splines"
+license = "MIT"
+dynamic = ["version"]
+description = "Splines in Euclidean Space and Beyond"
+readme = "README.rst"
+keywords = ["splines", "curves", "interpolation", "quaternions"]
+authors = [{ name = "Matthias Geier", email = "Matthias.Geier@gmail.com" }]
+classifiers = [
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.7"
+dependencies = ["numpy"]
+
+[project.urls]
+Documentation = "https://splines.readthedocs.io/"
+Repository = "https://github.com/AudioSceneDescriptionFormat/splines/"
+Issues = "https://github.com/AudioSceneDescriptionFormat/splines/issues"
+
+[dependency-groups]
+dev = [{ include-group = "test" }, { include-group = "doc" }]
+test = ["pytest"]
+doc = [
+    "insipid-sphinx-theme",
+    "nbsphinx",
+    "ipython!=8.7.0",             # see https://github.com/spatialaudio/nbsphinx/issues/687
+    "ipykernel",
+    "SymPy>=1.9",
+    "SciPy",
+    "matplotlib>=2.1",
+    "sphinxcontrib-bibtex>=2.1",
+    "sphinx-last-updated-by-git",
+    "sphinx-codeautolink",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "splines.__version__" }

@@ -21,10 +21,7 @@ jobs:
           python -c "import sys; assert sys.version.startswith('${{ matrix.python-version }}.')"
       - name: Install Python package
         run: |
-          $PIP_INSTALL .
-      - name: Install test dependencies
-        run: |
-          $PIP_INSTALL -r tests/requirements.txt
+          $PIP_INSTALL --group test .
       - name: Run pytest
         run: |
           python -m pytest
