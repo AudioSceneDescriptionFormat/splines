@@ -18,7 +18,7 @@ bibtex_bibfiles = ['references.bib']
 intersphinx_mapping = {
     'IPython': ('https://ipython.readthedocs.io/en/stable/', None),
     'matplotlib': ('https://matplotlib.org/', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'python': ('https://docs.python.org/3/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
     'sympy': ('https://docs.sympy.org/latest/', None),
