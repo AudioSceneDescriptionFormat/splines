@@ -30,7 +30,7 @@ jobs:
         run: |
           $SPHINX doc/ _build/html/ -d _build/doctrees/ -b html
       - name: Upload HTML
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: HTML
           path: _build/html/
@@ -43,7 +43,7 @@ jobs:
           working_directory: _build/latex
           root_file: splines.tex
       - name: Upload PDF
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: PDF
           path: _build/latex/splines.pdf
@@ -51,7 +51,7 @@ jobs:
         run: |
           $SPHINX doc/ _build/linkcheck/ -d _build/doctrees/ -b linkcheck -q
       - name: Upload linkcheck results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ success() || failure() }}
         with:
           name: linkcheck
