@@ -503,7 +503,7 @@ class KochanekBartels(DeCasteljau):
                 'There must be two more quaternions than TCB values '
                 '(except for closed curves)')
         if closed:
-            tcb = _np.row_stack([tcb, tcb[0]])
+            tcb = _np.vstack([tcb, tcb[0]])
         start, end, zip_quaternions, zip_grid = _check_endconditions(
             endconditions, quaternions, grid)
 
