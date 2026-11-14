@@ -51,6 +51,8 @@ linkcheck_ignore = [
     'https://stackoverflow.com/a/23980479/',
     # 403 Client Error: Forbidden for url:
     'https://www.blender.org',
+    # 429 Client Error: Too Many Requests for url:
+    'https://web.archive.org/',
 ]
 
 nbsphinx_execute_arguments = [
